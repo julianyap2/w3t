@@ -4,7 +4,6 @@ import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { LogoutButton, useAuth, useCandidActor, useIdentities } from "@bundly/ares-react";
 
 import { CandidActors } from "@app/canisters";
-import Header from "@app/components/header";
 
 type Profile = {
   username: string;
@@ -73,7 +72,6 @@ export default function IcConnectPage() {
 
   return (
     <>
-      <Header />
       <main className="p-6">
         <div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-8">

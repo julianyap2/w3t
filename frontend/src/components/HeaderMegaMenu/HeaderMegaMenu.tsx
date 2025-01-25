@@ -145,8 +145,9 @@ import { InternetIdentityButton } from '@bundly/ares-react';
             </Group>
   
             <Group visibleFrom="sm">
-              <Button variant="default">Log in</Button>
-              <Button>Sign up</Button>
+              <InternetIdentityButton>
+                Login
+              </InternetIdentityButton>
             </Group>
   
             <Burger opened={drawerOpened} onClick={toggleDrawer} hiddenFrom="sm" />
@@ -187,7 +188,9 @@ import { InternetIdentityButton } from '@bundly/ares-react';
             <Divider my="sm" />
   
             <Group justify="center" grow pb="xl" px="md">
-              <Button variant="default"><InternetIdentityButton /></Button>
+                <InternetIdentityButton>
+                  Login
+                </InternetIdentityButton>
             </Group>
           </ScrollArea>
         </Drawer>
