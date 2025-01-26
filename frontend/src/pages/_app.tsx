@@ -1,5 +1,5 @@
 import "@mantine/core/styles.css";
-import "tailwindcss/tailwind.css";
+import "../../../styles/global.css";
 import type { AppProps } from "next/app";
 
 import { Client, InternetIdentity } from "@bundly/ares-core";
@@ -26,7 +26,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
 
   return (
     <IcpConnectContextProvider client={client}>
-      <MantineProvider theme={theme}>
+      <MantineProvider defaultColorScheme="dark" theme={theme}>
         <Head>
           <title>W3Tilang</title>
           <meta

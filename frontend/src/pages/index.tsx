@@ -1,9 +1,12 @@
 import { Identity } from "@dfinity/agent";
 import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
-
+import styles from "../../../styles/index.module.css";
 import { LogoutButton, useAuth, useCandidActor, useIdentities } from "@bundly/ares-react";
 
 import { CandidActors } from "@app/canisters";
+import { Box, Grid } from "@mantine/core";
+import Layout from "@app/components/Layout/Layout";
+import Image from "next/image";
 
 type Profile = {
   username: string;
@@ -71,8 +74,25 @@ export default function IcConnectPage() {
   }
 
   return (
-    <>
-      <main className="p-6">
+    <Box className={styles.allContainer}>
+      <Box className="centerContainer">
+        <Grid>
+          <Grid.Col span={6}>
+            W3T
+          </Grid.Col>
+          <Grid.Col span={6}>
+            <Box className={styles.imageContainer}>
+              <Image 
+                src={"/placeholder.webp"}
+                width={400}
+                alt="W"
+                height={200}
+              />
+            </Box>
+          </Grid.Col>
+        </Grid>
+      </Box>
+      {/* <main className="p-6">
         <div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-8">
             <div className="bg-white rounded-lg shadow-md p-6">
@@ -125,8 +145,8 @@ export default function IcConnectPage() {
             </div>
           </div>
         </div>
-      </main>
-    </>
+      </main> */}
+    </Box>
   );
 }
 

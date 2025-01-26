@@ -86,7 +86,7 @@ import { InternetIdentityButton } from '@bundly/ares-react';
     ));
   
     return (
-      <Box pb={120}>
+      <Box>
         <header className={classes.header}>
           <Group justify="space-between" h="100%">
             {/* <MantineLogo size={30} /> */}
@@ -146,7 +146,7 @@ import { InternetIdentityButton } from '@bundly/ares-react';
   
             <Group visibleFrom="sm">
               <InternetIdentityButton>
-                Login
+                Connect
               </InternetIdentityButton>
             </Group>
   
@@ -189,7 +189,7 @@ import { InternetIdentityButton } from '@bundly/ares-react';
   
             <Group justify="center" grow pb="xl" px="md">
                 <InternetIdentityButton>
-                  Login
+                  Connect
                 </InternetIdentityButton>
             </Group>
           </ScrollArea>
