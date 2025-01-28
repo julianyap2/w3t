@@ -276,9 +276,15 @@ import { useRouter } from 'next/router';
             <Divider my="sm" />
   
             <Group justify="center" grow pb="xl" px="md">
-                <InternetIdentityButton>
+              <Button
+                onClick={handleClick}
+                className={classes.buttonConnect}
+              >
+                Connect
+              </Button>
+                {/* <InternetIdentityButton>
                   Connect
-                </InternetIdentityButton>
+                </InternetIdentityButton> */}
             </Group>
           </ScrollArea>
         </Drawer>
