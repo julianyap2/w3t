@@ -123,7 +123,7 @@ Get your canister ids:
 # Create canisters
 dfx canister create --all
 
-# Get backend canister id
+# Get backend canister id // be2us-64aaa-aaaaa-qaabq-cai
 dfx canister id test
 
 # Get internet-identity canister id
