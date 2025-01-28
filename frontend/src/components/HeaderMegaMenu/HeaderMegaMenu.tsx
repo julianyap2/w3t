@@ -1,5 +1,7 @@
 import {
     IconBook,
+    IconBrandChrome,
+    IconBrandEdge,
     IconChartPie3,
     IconChevronDown,
     IconCode,
@@ -28,6 +30,8 @@ import {
   import { useDisclosure } from '@mantine/hooks';
   import classes from './HeaderMegaMenu.module.css';
 import { InternetIdentityButton } from '@bundly/ares-react';
+import { notifications } from '@mantine/notifications';
+import { useRouter } from 'next/router';
   
   const mockdata = [
     {
@@ -66,7 +70,7 @@ import { InternetIdentityButton } from '@bundly/ares-react';
     const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
     const [linksOpened, { toggle: toggleLinks }] = useDisclosure(false);
     const theme = useMantineTheme();
-  
+    const router = useRouter()
     const links = mockdata.map((item) => (
       <UnstyledButton className={classes.subLink} key={item.title}>
         <Group wrap="nowrap" align="flex-start">
@@ -84,9 +88,86 @@ import { InternetIdentityButton } from '@bundly/ares-react';
         </Group>
       </UnstyledButton>
     ));
+
+    const handleClick = () => {
+      function detectBrowser() {
+        const userAgent = navigator.userAgent.toLowerCase();
+        if (userAgent.indexOf('chrome') > -1 && userAgent.indexOf('edge') === -1 && userAgent.indexOf('safari') > -1) {
+          return 'chrome';
+        } else if (userAgent.indexOf('firefox') > -1) {
+          return 'firefox';
+        } else if (userAgent.indexOf('edge') > -1) {
+          return 'edge';
+        } else if (userAgent.indexOf('safari') > -1) {
+          return 'safari';
+        } else {
+          return 'other';
+        }
+      }
+      
+      async function checkExtension() {
+        const browser = detectBrowser();
+        
+        switch (browser) {
+          case 'chrome':
+          case 'edge':
+            // Chrome and Edge extension check
+            try {
+              // router.reload();
+              if(window.ic){
+                window.ic.infinityWallet.requestConnect();
+              }else{
+                window.open("https://chromewebstore.google.com/detail/bitfinity-wallet/jnldfbidonfeldmalbflbmlebbipcnle", "_blank")
+              }
+              // await chrome.runtime.sendMessage('jnldfbidonfeldmalbflbmlebbipcnle', { type: 'checkExtension' }, (response) => {
+              //   if (response && response.exists) {
+              //     console.log(`${browser} extension is installed`);
+              //   } else {
+              //     console.log(`${browser} extension is not installed1`);
+              //   }
+              // });
+            } catch (error) {
+              console.log(`${browser} extension is not installed`);
+            }
+            break;
+      
+          case 'firefox':
+            // Firefox extension check
+            notifications.show({
+              title: 'Extension Not Available!',
+              message: 'Please Use Either Edge or Chrome!',
+              color: "transparent",
+              icon: <IconBrandChrome/>
+            })
+            break;
+      
+          case 'safari':
+            // Safari extension check
+            notifications.show({
+              title: 'Extension Not Available!',
+              message: 'Please Use Either Edge or Chrome!',
+              color: "transparent",
+              icon: <IconBrandChrome/>
+            })
+            break;
+      
+          default:
+            console.log('Unsupported browser or extension cannot be detected');
+        }
+      }
+      
+      // Call the checkExtension function
+      checkExtension();
+      
+  }
   
     return (
-      <Box>
+      <Box 
+        style={{
+          zIndex:"9000",
+          background: "black"
+        }}
+      >
         <header className={classes.header}>
           <Group justify="space-between" h="100%">
             {/* <MantineLogo size={30} /> */}
@@ -145,9 +226,16 @@ import { InternetIdentityButton } from '@bundly/ares-react';
             </Group>
   
             <Group visibleFrom="sm">
-              <InternetIdentityButton>
+              {/* <InternetIdentityButton>
                 Connect
-              </InternetIdentityButton>
+              </InternetIdentityButton> */}
+              <Button
+                onClick={handleClick}
+                className={classes.buttonConnect}
+                w={200}
+              >
+                Connect
+              </Button>
             </Group>
   
             <Burger opened={drawerOpened} onClick={toggleDrawer} hiddenFrom="sm" />

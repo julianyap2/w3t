@@ -1,4 +1,5 @@
 import "@mantine/core/styles.css";
+import '@mantine/notifications/styles.css';
 import "../../../styles/global.css";
 import type { AppProps } from "next/app";
 
@@ -8,6 +9,7 @@ import { IcpConnectContextProvider } from "@bundly/ares-react";
 import { candidCanisters } from "@app/canisters";
 import Head from "next/head";
 import { MantineProvider } from "@mantine/core";
+import { Notifications } from '@mantine/notifications';
 import { theme } from "../../theme";
 import Layout from "../components/Layout/Layout";
 
@@ -35,6 +37,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
           />
           <link rel="shortcut icon" href="/favicon.svg" />
         </Head>
+        <Notifications />
         <Layout>
           <Component {...pageProps} />
         </Layout>
