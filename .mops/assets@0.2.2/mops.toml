@@ -1,0 +1,10 @@
+[package]
+name = "assets"
+version = "0.2.2"
+description = "Asset canister functionality for your canister"
+repository = "https://github.com/krpeacock/assets"
+keywords = ["canister", "ic", "internet computer", "asset", "assets", "file", "http"]
+license = "MIT"
+
+[dependencies]
+test = "2.0.0"
