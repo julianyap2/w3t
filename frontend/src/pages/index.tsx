@@ -1,10 +1,12 @@
 import { Identity } from "@dfinity/agent";
 import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
-
+import styles from "../../../styles/index.module.css";
 import { LogoutButton, useAuth, useCandidActor, useIdentities } from "@bundly/ares-react";
 
 import { CandidActors } from "@app/canisters";
-import Header from "@app/components/header";
+import { Box, Button, Grid, Stack } from "@mantine/core";
+import Layout from "@app/components/Layout/Layout";
+import Image from "next/image";
 
 type Profile = {
   username: string;
@@ -16,13 +18,13 @@ export default function IcConnectPage() {
   const identities = useIdentities();
   const [profile, setProfile] = useState<Profile | undefined>();
   const [loading, setLoading] = useState(false); // State for loader
-  const test = useCandidActor<CandidActors>("test", currentIdentity, {
-    canisterId: process.env.NEXT_PUBLIC_TEST_CANISTER_ID,
-  }) as CandidActors["test"];
+  // const test = useCandidActor<CandidActors>("test", currentIdentity, {
+  //   canisterId: process.env.NEXT_PUBLIC_TEST_CANISTER_ID,
+  // }) as CandidActors["test"];
 
-  useEffect(() => {
-    getProfile();
-  }, [currentIdentity]);
+  // useEffect(() => {
+  //   getProfile();
+  // }, [currentIdentity]);
 
   function formatPrincipal(principal: string): string {
     const parts = principal.split("-");
@@ -35,46 +37,133 @@ export default function IcConnectPage() {
     return currentIdentity.getPrincipal().toString() === identityButton.getPrincipal().toString();
   }
 
-  async function getProfile() {
-    try {
-      const response = await test.getProfile();
+  // async function getProfile() {
+  //   try {
+  //     const response = await test.getProfile();
 
-      if ("err" in response) {
-        if ("userNotAuthenticated" in response.err) console.log("User not authenticated");
-        else console.log("Error fetching profile");
-      }
+  //     if ("err" in response) {
+  //       if ("userNotAuthenticated" in response.err) console.log("User not authenticated");
+  //       else console.log("Error fetching profile");
+  //     }
 
-      const profile = "ok" in response ? response.ok : undefined;
-      setProfile(profile);
-    } catch (error) {
-      console.error({ error });
-    }
-  }
+  //     const profile = "ok" in response ? response.ok : undefined;
+  //     setProfile(profile);
+  //   } catch (error) {
+  //     console.error({ error });
+  //   }
+  // }
 
-  async function registerProfile(username: string, bio: string) {
-    try {
-      setLoading(true); // Show loader
-      const response = await test.createProfile(username, bio);
+  // async function registerProfile(username: string, bio: string) {
+  //   try {
+  //     setLoading(true); // Show loader
+  //     const response = await test.createProfile(username, bio);
 
-      if ("err" in response) {
-        if ("userNotAuthenticated" in response.err) alert("User not authenticated");
-        if ("profileAlreadyExists" in response.err) alert("Profile already exists");
+  //     if ("err" in response) {
+  //       if ("userNotAuthenticated" in response.err) alert("User not authenticated");
+  //       if ("profileAlreadyExists" in response.err) alert("Profile already exists");
 
-        throw new Error("Error creating profile");
-      }
+  //       throw new Error("Error creating profile");
+  //     }
 
-      setProfile({ username, bio });
-    } catch (error) {
-      console.error({ error });
-    } finally {
-      setLoading(false); // Hide loader
-    }
-  }
+  //     setProfile({ username, bio });
+  //   } catch (error) {
+  //     console.error({ error });
+  //   } finally {
+  //     setLoading(false); // Hide loader
+  //   }
+  // }
 
   return (
-    <>
-      <Header />
-      <main className="p-6">
+    <Box className={styles.allContainer}>
+      <Box className="centerContainer">
+        <Grid
+          style={{
+            paddingTop:"40px"
+          }}
+        >
+          <Grid.Col span={{ base: 12, md: 6, lg: 6 }}>
+            <Stack
+              align="flex-start"
+              justify="space-between"
+              gap="md"
+              h={"100%"}
+            >
+              <Stack
+                align="stretch"
+                justify="flex-start"
+                gap="md"
+              >
+                <Box className={styles.title}>
+                  W3T
+                </Box>
+                <Box className={styles.subTitle}>
+                  Project Description
+                </Box>
+              </Stack>
+              <Button
+                variant="filled"
+                color="rgba(95, 147, 107, 1)"
+              >
+                Upload Your Evidence
+              </Button>
+            </Stack>
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, md: 6, lg: 6 }}>
+            <Box className={styles.imageContainer}>
+              <Image 
+                src={"/placeholder.webp"}
+                width={400}
+                alt="W"
+                height={200}
+              />
+            </Box>
+          </Grid.Col>
+        </Grid>
+        <Grid
+          style={{
+            marginTop:"40px"
+          }}
+        >
+            <Grid.Col span={{ base: 12, md: 6, lg: 6 }}>
+              <Box className={styles.imageContainer}>
+                <Image 
+                  src={"/placeholder.webp"}
+                  width={400}
+                  alt="W"
+                  height={200}
+                />
+              </Box>
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 6, lg: 6 }}>
+              <Stack
+                align="flex-start"
+                justify="space-between"
+                gap="md"
+                h={"100%"}
+              >
+                <Stack
+                  align="stretch"
+                  justify="flex-start"
+                  gap="md"
+                >
+                  <Box className={styles.title}>
+                    Why W3T
+                  </Box>
+                  <Box  className={styles.subTitle}>
+                    Why W3T Description
+                  </Box>
+                </Stack>
+                <Button
+                  variant="filled"
+                  color="rgba(95, 147, 107, 1)"
+                >
+                  Get Yours
+                </Button>
+              </Stack>
+            </Grid.Col>
+        </Grid>
+      </Box>
+      {/* <main className="p-6">
         <div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-8">
             <div className="bg-white rounded-lg shadow-md p-6">
@@ -127,8 +216,8 @@ export default function IcConnectPage() {
             </div>
           </div>
         </div>
-      </main>
-    </>
+      </main> */}
+    </Box>
   );
 }
 

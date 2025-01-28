@@ -1,0 +1,14 @@
+.allContainer{
+    background: linear-gradient(90deg, #121E0E 0%, #173323 55%, #051F29 100%);
+    height: 100vh;
+}
+
+.title{
+    font-size: 3rem;
+    font-weight: 700;
+    color: white;
+}
+
+.subTitle{
+    font-size: 1.7rem;
+}
