@@ -39,7 +39,7 @@ export default function IcConnectPage() {
 
   async function getProfile() {
     try {
-      const response = await w3t.getCallerPrincipalToText();
+      const response = await w3t.getAllReports();
 
       if ("err" in response) {
         if ("userNotAuthorized" in response.err) console.log("User not authorized");

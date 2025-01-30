@@ -1,7 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // output: "export",
+  output: "export",
   distDir: "build",
+  staticPageGenerationTimeout: 180,
   images: {
     unoptimized: true,
   }
