@@ -7,19 +7,7 @@
     }
   },
   "canisters": {
-    "test": {
-      "type": "motoko",
-      "main": "backend/w3t.mo",
-      "dependencies": [
-        ".mops"
-      ],
-      "declarations": {
-        "node_compatibility": true,
-        "output": "frontend/src/declarations/test"
-      }
-    },
     "frontend": {
-      "dependencies": ["test"],
       "frontend": {
         "entrypoint": "frontend/build/index.html"
       },
@@ -45,7 +33,11 @@
     },
     "w3t": {
       "type": "motoko",
-      "main": "backend/w3t.mo"
+      "main": "backend/w3t.mo",
+      "declarations": {
+        "node_compatibility": true,
+        "output": "./src/declarations/w3t"
+      }
     }
   }
 }
