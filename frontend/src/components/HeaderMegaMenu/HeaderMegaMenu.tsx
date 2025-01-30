@@ -114,8 +114,8 @@ import { useRouter } from 'next/router';
             // Chrome and Edge extension check
             try {
               // router.reload();
-              if(window.ic){
-                window.ic.infinityWallet.requestConnect();
+              if(typeof window.ic !== "undefined" && window.ic.infinityWallet){
+                await window.ic.infinityWallet.requestConnect();
               }else{
                 window.open("https://chromewebstore.google.com/detail/bitfinity-wallet/jnldfbidonfeldmalbflbmlebbipcnle", "_blank")
               }
