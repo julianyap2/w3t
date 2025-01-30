@@ -18,13 +18,13 @@ export default function IcConnectPage() {
   const identities = useIdentities();
   const [profile, setProfile] = useState<Profile | undefined>();
   const [loading, setLoading] = useState(false); // State for loader
-  // const test = useCandidActor<CandidActors>("test", currentIdentity, {
-  //   canisterId: process.env.NEXT_PUBLIC_TEST_CANISTER_ID,
-  // }) as CandidActors["test"];
+  const w3t = useCandidActor<CandidActors>("w3t", currentIdentity, {
+    canisterId: process.env.NEXT_PUBLIC_TEST_CANISTER_ID,
+  }) as CandidActors["w3t"];
 
-  // useEffect(() => {
-  //   getProfile();
-  // }, [currentIdentity]);
+  useEffect(() => {
+    getProfile();
+  }, [currentIdentity]);
 
   function formatPrincipal(principal: string): string {
     const parts = principal.split("-");
@@ -37,21 +37,22 @@ export default function IcConnectPage() {
     return currentIdentity.getPrincipal().toString() === identityButton.getPrincipal().toString();
   }
 
-  // async function getProfile() {
-  //   try {
-  //     const response = await test.getProfile();
+  async function getProfile() {
+    try {
+      const response = await w3t.getAllReports();
 
-  //     if ("err" in response) {
-  //       if ("userNotAuthenticated" in response.err) console.log("User not authenticated");
-  //       else console.log("Error fetching profile");
-  //     }
+      if ("err" in response) {
+        if ("userNotAuthorized" in response.err) console.log("User not authorized");
+        else console.log("Error fetching profile");
+      }
 
-  //     const profile = "ok" in response ? response.ok : undefined;
-  //     setProfile(profile);
-  //   } catch (error) {
-  //     console.error({ error });
-  //   }
-  // }
+      const profile = "ok" in response ? response.ok : undefined;
+      console.log(profile)
+      // setProfile(profile);
+    } catch (error) {
+      console.error({ error });
+    }
+  }
 
   // async function registerProfile(username: string, bio: string) {
   //   try {
