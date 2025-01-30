@@ -8,7 +8,6 @@ import Result "mo:base/Result";
 import Time "mo:base/Time";
 import Array "mo:base/Array";
 import Int8 "mo:base/Int8";
-import Debug "mo:base/Debug";
 import UUID "mo:uuid/UUID";
 import SourceV4 "mo:uuid/async/SourceV4";
 
@@ -70,23 +69,35 @@ shared ({caller = _owner}) actor class W3T () {
       return #ok("New police has been added");
     };
 
-    // public shared ({caller}) func validateReportStatus (uid: Text, status: ReportStatus) : async GeneralResponse {
-    //   let callerRole = switch (Map.get(roleMap, Map.thash, Principal.toText(caller))) {
-    //     case (?_role) { _role };
-    //     case null { #User };
-    //   };
-    //   if (Principal.isAnonymous(caller) or (callerRole != #Police)) return #err(#userNotAuthorized);
+    public shared ({caller}) func validateReportStatus (uid: Text, status: ReportStatus, policeReportNumber: ?Text) : async GeneralResponse {
+      let callerRole = switch (Map.get(roleMap, Map.thash, Principal.toText(caller))) {
+        case (?_role) { _role };
+        case null { #User };
+      };
+      if (Principal.isAnonymous(caller) or (callerRole != #Police)) return #err(#userNotAuthorized);
 
-    //   switch (Map.get(reports, Map.thash, uid)){
-    //     case (?_report) {
-    //       var updatedReport = _report;
-    //       updatedReport.status := status;
-    //     };
-    //     case null {};
-    //   };
+      switch (Map.get(reports, Map.thash, uid)){
+        case (?_report) {
+          let updateReport: Report = {
+            reporter = _report.reporter;
+            police = _report.police;
+            violationType = _report.violationType;
+            status = status;
+            licenseNumber = _report.licenseNumber;
+            policeReportNumber = policeReportNumber;
+            stakeAmount = _report.stakeAmount;
+            rewardAmount = _report.rewardAmount;
+            submittedAt = _report.submittedAt;
+            validatedAt = ?Time.now();
+            rewardPaidAt = _report.rewardPaidAt;
+          };
+          Map.set(reports, Map.thash, uid, updateReport);
+        };
+        case null { return #err(#keyNotFound); };
+      };
 
-    //   return #ok("Status has been updated.");
-    // };
+      return #ok("Status has been updated.");
+    };
 
     // ==============================================================================================================================
 
