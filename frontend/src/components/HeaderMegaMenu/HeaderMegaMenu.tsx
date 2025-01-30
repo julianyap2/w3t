@@ -89,75 +89,73 @@ import { useRouter } from 'next/router';
       </UnstyledButton>
     ));
 
-    const handleClick = () => {
-      function detectBrowser() {
-        const userAgent = navigator.userAgent.toLowerCase();
-        if (userAgent.indexOf('chrome') > -1 && userAgent.indexOf('edge') === -1 && userAgent.indexOf('safari') > -1) {
-          return 'chrome';
-        } else if (userAgent.indexOf('firefox') > -1) {
-          return 'firefox';
-        } else if (userAgent.indexOf('edge') > -1) {
-          return 'edge';
-        } else if (userAgent.indexOf('safari') > -1) {
-          return 'safari';
-        } else {
-          return 'other';
-        }
+    function detectBrowser() {
+      const userAgent = navigator.userAgent.toLowerCase();
+      if (userAgent.indexOf('chrome') > -1 && userAgent.indexOf('edge') === -1 && userAgent.indexOf('safari') > -1) {
+        return 'chrome';
+      } else if (userAgent.indexOf('firefox') > -1) {
+        return 'firefox';
+      } else if (userAgent.indexOf('edge') > -1) {
+        return 'edge';
+      } else if (userAgent.indexOf('safari') > -1) {
+        return 'safari';
+      } else {
+        return 'other';
       }
+    }
+    const handleClick = async() => {
+      const browser = detectBrowser();
       
-      async function checkExtension() {
-        const browser = detectBrowser();
-        
-        switch (browser) {
-          case 'chrome':
-          case 'edge':
-            // Chrome and Edge extension check
-            try {
-              // router.reload();
-              if(typeof window.ic !== "undefined" && window.ic.infinityWallet){
-                await window.ic.infinityWallet.requestConnect();
+      switch (browser) {
+        case 'chrome':
+        case 'edge':
+          // Chrome and Edge extension check
+          try {
+            // router.reload();
+            if(typeof window.ic !== "undefined" && window.ic.infinityWallet){
+              if(window.ic.infinityWallet.isConnected()){
+
               }else{
-                window.open("https://chromewebstore.google.com/detail/bitfinity-wallet/jnldfbidonfeldmalbflbmlebbipcnle", "_blank")
+                await window.ic.infinityWallet.requestConnect();
               }
-              // await chrome.runtime.sendMessage('jnldfbidonfeldmalbflbmlebbipcnle', { type: 'checkExtension' }, (response) => {
-              //   if (response && response.exists) {
-              //     console.log(`${browser} extension is installed`);
-              //   } else {
-              //     console.log(`${browser} extension is not installed1`);
-              //   }
-              // });
-            } catch (error) {
-              console.log(`${browser} extension is not installed`);
+            }else{
+              window.open("https://chromewebstore.google.com/detail/bitfinity-wallet/jnldfbidonfeldmalbflbmlebbipcnle", "_blank")
             }
-            break;
-      
-          case 'firefox':
-            // Firefox extension check
-            notifications.show({
-              title: 'Extension Not Available!',
-              message: 'Please Use Either Edge or Chrome!',
-              color: "transparent",
-              icon: <IconBrandChrome/>
-            })
-            break;
-      
-          case 'safari':
-            // Safari extension check
-            notifications.show({
-              title: 'Extension Not Available!',
-              message: 'Please Use Either Edge or Chrome!',
-              color: "transparent",
-              icon: <IconBrandChrome/>
-            })
-            break;
-      
-          default:
-            console.log('Unsupported browser or extension cannot be detected');
-        }
+            // await chrome.runtime.sendMessage('jnldfbidonfeldmalbflbmlebbipcnle', { type: 'checkExtension' }, (response) => {
+            //   if (response && response.exists) {
+            //     console.log(`${browser} extension is installed`);
+            //   } else {
+            //     console.log(`${browser} extension is not installed1`);
+            //   }
+            // });
+          } catch (error) {
+            console.log(`${browser} extension is not installed`);
+          }
+          break;
+    
+        case 'firefox':
+          // Firefox extension check
+          notifications.show({
+            title: 'Extension Not Available!',
+            message: 'Please Use Either Edge or Chrome!',
+            color: "transparent",
+            icon: <IconBrandChrome/>
+          })
+          break;
+    
+        case 'safari':
+          // Safari extension check
+          notifications.show({
+            title: 'Extension Not Available!',
+            message: 'Please Use Either Edge or Chrome!',
+            color: "transparent",
+            icon: <IconBrandChrome/>
+          })
+          break;
+    
+        default:
+          console.log('Unsupported browser or extension cannot be detected');
       }
-      
-      // Call the checkExtension function
-      checkExtension();
       
   }
   
