@@ -9,7 +9,10 @@
   "canisters": {
     "test": {
       "type": "motoko",
-      "main": "backend/test/main.mo",
+      "main": "backend/w3t.mo",
+      "dependencies": [
+        ".mops"
+      ],
       "declarations": {
         "node_compatibility": true,
         "output": "frontend/src/declarations/test"
