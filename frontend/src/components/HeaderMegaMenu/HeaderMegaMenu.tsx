@@ -113,8 +113,8 @@ import { useRouter } from 'next/router';
           try {
             // router.reload();
             if(typeof window.ic !== "undefined" && window.ic.infinityWallet){
-              if(window.ic.infinityWallet.isConnected()){
-
+              if(await window.ic.infinityWallet.isConnected()){
+                
               }else{
                 await window.ic.infinityWallet.requestConnect();
               }

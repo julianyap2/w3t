@@ -33,7 +33,11 @@
     },
     "w3t": {
       "type": "motoko",
-      "main": "backend/w3t.mo"
+      "main": "backend/w3t.mo",
+      "declarations": {
+        "node_compatibility": true,
+        "output": "./src/declarations/w3t"
+      }
     }
   }
 }
