@@ -171,7 +171,7 @@ import { useRouter } from 'next/router';
             {/* <MantineLogo size={30} /> */}
                 W3T
             <Group h="100%" gap={0} visibleFrom="sm">
-              <a href="#" className={classes.link}>
+              {/* <a href="#" className={classes.link}>
                 Home
               </a>
               <HoverCard width={600} position="bottom" radius="md" shadow="md" withinPortal>
@@ -220,7 +220,7 @@ import { useRouter } from 'next/router';
               </a>
               <a href="#" className={classes.link}>
                 Academy
-              </a>
+              </a> */}
             </Group>
   
             <Group visibleFrom="sm">
@@ -250,7 +250,7 @@ import { useRouter } from 'next/router';
           zIndex={1000000}
         >
           <ScrollArea h="calc(100vh - 80px" mx="-md">
-            <Divider my="sm" />
+            {/* <Divider my="sm" />
   
             <a href="#" className={classes.link}>
               Home
@@ -271,7 +271,7 @@ import { useRouter } from 'next/router';
               Academy
             </a>
   
-            <Divider my="sm" />
+            <Divider my="sm" /> */}
   
             <Group justify="center" grow pb="xl" px="md">
               <Button
