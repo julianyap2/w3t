@@ -7,11 +7,12 @@ import Iter "mo:base/Iter";
 import Result "mo:base/Result";
 import Time "mo:base/Time";
 import Array "mo:base/Array";
-import Int16 "mo:base/Int16";
 import Int8 "mo:base/Int8";
+import Debug "mo:base/Debug";
 import UUID "mo:uuid/UUID";
+import SourceV4 "mo:uuid/async/SourceV4";
 
-actor {
+shared ({caller = _owner}) actor class W3T () {
     type ViolationType = {
         #LLAJ222009_291;
         #LLAJ222009_287;
@@ -26,43 +27,87 @@ actor {
     };
 
     type Report = {
-        reporter: Principal;
-        police: Principal;
-        violationType: ViolationType;
-        status: ReportStatus;
-        video: Blob;
-        licenseNumber: Text;
-        policeReportNumber: ?Text;
-        stakeAmount: Nat;
-        rewardAmount: Nat;
-        submittedAt: ?Time.Time;
-        validatedAt: ?Time.Time;
-        rewardPaidAt: ?Time.Time;
+      reporter: Principal;
+      police: Principal;
+      violationType: ViolationType;
+      status: ReportStatus;
+      licenseNumber: Text;
+      policeReportNumber: ?Text;
+      stakeAmount: Nat;
+      rewardAmount: Nat;
+      submittedAt: ?Time.Time;
+      validatedAt: ?Time.Time;
+      rewardPaidAt: ?Time.Time;
     };
+
+    type Role = {
+      #SuperAdmin;
+      #Police;
+      #User;
+    };
+
+    private stable let owner: Principal = _owner; // --> I will rugpull
+    private stable var roleMap = Map.new<Text, Role>();
 
     stable var addressReportMap = Map.new<Text, [Text]>();
     stable var reports = Map.new<Text, Report>();
+    stable var videosReportMap = Map.new<Text, [Blob]>();
 
+    type GeneralResponse = Result.Result<Text, GeneralError>;
     type GeneralError = {
         #userNotAuthorized;
+        #keyNotFound;
+        #chunkNotFound;
+        #indexOutOfBound;
     };
 
-    type GetReportsResponse = Result.Result<[Report], GeneralError>;
+    // ==============================================================================================================================
 
+    public shared ({caller}) func addPolice (police: Principal) : async GeneralResponse {
+      if (Principal.isAnonymous(caller) or caller != owner) return #err(#userNotAuthorized);
+
+      Map.set(roleMap, Map.thash, Principal.toText(caller), #Police);
+      return #ok("New police has been added");
+    };
+
+    // public shared ({caller}) func validateReportStatus (uid: Text, status: ReportStatus) : async GeneralResponse {
+    //   let callerRole = switch (Map.get(roleMap, Map.thash, Principal.toText(caller))) {
+    //     case (?_role) { _role };
+    //     case null { #User };
+    //   };
+    //   if (Principal.isAnonymous(caller) or (callerRole != #Police)) return #err(#userNotAuthorized);
+
+    //   switch (Map.get(reports, Map.thash, uid)){
+    //     case (?_report) {
+    //       var updatedReport = _report;
+    //       updatedReport.status := status;
+    //     };
+    //     case null {};
+    //   };
+
+    //   return #ok("Status has been updated.");
+    // };
+
+    // ==============================================================================================================================
+
+    type GetReportsResponse = Result.Result<[Report], GeneralError>;
     public query ({caller}) func getAllReports () : async GetReportsResponse {
       if (Principal.isAnonymous(caller)) return #err(#userNotAuthorized);
+
       let reportsIter = Map.vals(reports);
       return #ok(Iter.toArray(reportsIter));
     }; 
 
     public query ({caller}) func getAllReportsWithPagination () : async GetReportsResponse {
       if (Principal.isAnonymous(caller)) return #err(#userNotAuthorized);
+
       let reportsIter = Map.vals(reports);
       return #ok(Iter.toArray(reportsIter));
     }; 
 
     public query ({caller}) func getMyReports (pagination: ?Int8, section: ?Int8) : async GetReportsResponse {
       if (Principal.isAnonymous(caller)) return #err(#userNotAuthorized);
+
       switch (Map.get(addressReportMap, Map.thash, Principal.toText(caller))) {
         case (?_uids) { return #ok(collectReports(_uids, pagination, section)); };
         case null { return #ok([]); };
@@ -80,11 +125,73 @@ actor {
       return collectedReports;
     };
 
-    type SubmitReportResponse = Result.Result<Report, GeneralError>;
 
-    public shared ({caller}) func submitReport(report: Report) : async SubmitReportResponse {
-        if (Principal.isAnonymous(caller)) return #err(#userNotAuthorized);
-        return #ok(report);
+    public shared ({caller}) func submitReport(report: Report) : async GeneralResponse {
+      if (Principal.isAnonymous(caller)) return #err(#userNotAuthorized);
+
+      let uuidGenerator = SourceV4.Source();
+      let uuid = await uuidGenerator.new();
+      let uuidText = UUID.toText(uuid);
+
+      var uids: [Text] = [];
+      switch (Map.get(addressReportMap, Map.thash, Principal.toText(caller))) {
+        case(?_uids) { uids := Array.append(_uids, [uuidText]); };
+        case null { };
+      };
+      
+      Map.set(addressReportMap, Map.thash, Principal.toText(caller), [uuidText]);
+      Map.set(reports, Map.thash, uuidText, report);
+      return #ok(uuidText);
     };
- 
+
+    public shared ({caller}) func uploadVideoByChunk(uid: Text, chunk: Blob) : async Result.Result<Text, GeneralError> {
+      if (Principal.isAnonymous(caller)) return #err(#userNotAuthorized);
+
+      switch (Map.get(addressReportMap, Map.thash, Principal.toText(caller))) {
+        case (?_) {  };
+        case null { return #err(#keyNotFound); };
+      };
+
+      var videoChunks: [Blob] = switch (Map.get(videosReportMap, Map.thash, uid)) {
+        case(?_chunks) { _chunks; };
+        case null { []; };
+      };      
+
+      videoChunks := Array.append(videoChunks, [chunk]);
+      Map.set(videosReportMap, Map.thash, uid, videoChunks);
+
+      return #ok("Chunk uploaded.");
+    };
+
+    public shared ({caller}) func deleteVideo(uid: Text) : async GeneralResponse {
+      if (Principal.isAnonymous(caller)) return #err(#userNotAuthorized);
+
+      switch (Map.get(videosReportMap, Map.thash, uid)) {
+        case (?_chunks) { 
+          Map.set(videosReportMap, Map.thash, uid, []);
+        };
+        case null { return #err(#keyNotFound); }
+      };
+      return #ok("Video deleted.");
+    };
+    
+    type GetVideoChunkResponse = Result.Result<Blob, GeneralError>;
+    public query ({caller}) func getVideoChunk(uid: Text, index: Nat) : async GetVideoChunkResponse {
+      if (Principal.isAnonymous(caller)) return #err(#userNotAuthorized);
+
+      switch (Map.get(videosReportMap, Map.thash, uid)) {
+        case (?_chunks) { 
+          if (index >= _chunks.size()) {
+            return #err(#indexOutOfBound);
+          };
+          return #ok(_chunks[index]);
+        };
+        case null { return #err(#chunkNotFound); }
+      };
+    };
+
+    public query ({caller}) func getCallerPrincipalToText() : async Text {
+      return Principal.toText(caller);
+    };
+
 }
