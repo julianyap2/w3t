@@ -9,12 +9,13 @@
     "clean": "rm -rf .next && rm -rf .turbo && rm -rf build && rm -rf src/declarations && rm -rf node_modules"
   },
   "dependencies": {
-    "@mantine/core": "7.16.1",
-    "@mantine/hooks": "7.16.1",
-    "@tabler/icons-react": "^3.28.1",
     "@bundly/ares-core": "0.2.0",
     "@bundly/ares-react": "^0.2.0",
     "@dfinity/agent": "^1.4.0",
+    "@mantine/core": "7.16.1",
+    "@mantine/hooks": "7.16.1",
+    "@mantine/notifications": "^7.16.2",
+    "@tabler/icons-react": "^3.28.1",
     "next": "14.2.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
@@ -27,7 +28,6 @@
     "eslint": "^9.6.0",
     "eslint-config-next": "14.2.3",
     "postcss": "^8.4.39",
-    "tailwindcss": "^3.4.4",
     "typescript": "^5.5.3"
   }
 }

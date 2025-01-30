@@ -179,7 +179,7 @@ Comment the next line into `frontend/next.config.mjs` file:
 // output: "export",
 ```
 
-Then, navitate to `frontend` folder:
+Then, navigate to `frontend` folder:
 
 `cd frontend`
 

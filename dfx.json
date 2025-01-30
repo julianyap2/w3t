@@ -1,6 +1,11 @@
 {
   "version": 1,
   "dfx": "0.24.3",
+  "defaults": {
+    "build": {
+      "packtool": "mops sources"
+    }
+  },
   "canisters": {
     "test": {
       "type": "motoko",
@@ -31,6 +36,16 @@
           "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
         }
       }
+    },
+    "w3t_token": {
+      "type": "custom",
+      "candid": "https://raw.githubusercontent.com/dfinity/ic/4ba583480e05a518aa2bcf36f5a0e48475e8edc2/rs/ledger_suite/icrc1/ledger/ledger.did",
+      "wasm": "https://download.dfinity.systems/ic/4ba583480e05a518aa2bcf36f5a0e48475e8edc2/canisters/ic-icrc1-ledger.wasm.gz",
+      "init_arg": "(variant { Init = record { token_symbol = \"W3T\"; token_name = \"Web3 Tilang\"; minting_account = record { owner = principal \"snath-bcrno-n3e7h-tj2gb-7gpaw-s5f62-i2huz-6p5sw-m5eln-2snym-fae\"; }; transfer_fee = 10_000; metadata = vec {}; initial_balances = vec { record { record { owner = principal \"snath-bcrno-n3e7h-tj2gb-7gpaw-s5f62-i2huz-6p5sw-m5eln-2snym-fae\"; }; 100_000_000_000; }; }; archive_options = record { num_blocks_to_archive = 1000; trigger_threshold = 2000; controller_id = principal \"snath-bcrno-n3e7h-tj2gb-7gpaw-s5f62-i2huz-6p5sw-m5eln-2snym-fae\"; }; feature_flags = opt record { icrc2 = true; }; } })"
+    },
+    "w3t": {
+      "type": "motoko",
+      "main": "backend/w3t.mo"
     }
   }
 }
