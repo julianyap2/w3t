@@ -46,7 +46,7 @@ shared ({caller = _owner}) actor class W3T () {
       #User;
     };
 
-    private stable let owner: Principal = _owner; // --> I will rugpull
+    private stable let owner: Principal = _owner;
     private stable var roleMap = Map.new<Text, Role>();
 
     stable var addressReportMap = Map.new<Text, [Text]>();
