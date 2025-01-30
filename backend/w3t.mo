@@ -8,11 +8,17 @@ import Result "mo:base/Result";
 import Time "mo:base/Time";
 import Array "mo:base/Array";
 import Int8 "mo:base/Int8";
+import Error "mo:base/Error";
 import Debug "mo:base/Debug";
 import UUID "mo:uuid/UUID";
+import ICRC "./ICRC";
 import SourceV4 "mo:uuid/async/SourceV4";
 
-shared ({caller = _owner}) actor class W3T () {
+shared ({caller = _owner}) actor class W3T(
+  init_args : {
+    token_canister_id: Text;
+  }
+) = this {
     type ViolationType = {
         #LLAJ222009_291;
         #LLAJ222009_287;
@@ -52,6 +58,8 @@ shared ({caller = _owner}) actor class W3T () {
     stable var addressReportMap = Map.new<Text, [Text]>();
     stable var reports = Map.new<Text, Report>();
     stable var videosReportMap = Map.new<Text, [Blob]>();
+    let w3tToken : ICRC.Actor = actor (init_args.token_canister_id);
+    stable var balanceOf = Map.new<Text, Nat>();
 
     type GeneralResponse = Result.Result<Text, GeneralError>;
     type GeneralError = {
@@ -59,6 +67,8 @@ shared ({caller = _owner}) actor class W3T () {
         #keyNotFound;
         #chunkNotFound;
         #indexOutOfBound;
+        #notEnoughBalance;
+        #withdrawFailed;
     };
 
     // ==============================================================================================================================
@@ -89,6 +99,48 @@ shared ({caller = _owner}) actor class W3T () {
     // };
 
     // ==============================================================================================================================
+
+    public func getToken () : async Result.Result<Text, Text> {
+      try {
+        let symbol = await w3tToken.icrc1_symbol();
+        #ok("Successfully connected to token canister");
+      } catch (error) {
+        #err("Failed to connect to token canister");
+      }
+    };
+    
+    private func _getBalanceOf(principal: Principal) : Nat {
+      let balance = switch(Map.get(balanceOf, Map.thash, Principal.toText(principal))) {
+        case(?balance) { balance };
+        case(null) { 0 };
+      };
+
+      return balance;
+    };
+
+    public shared ({caller}) func getMyBalance() : async Result.Result<Nat, GeneralError> {
+      if (Principal.isAnonymous(caller)) return #err(#userNotAuthorized);
+      let balance = _getBalanceOf(caller);
+      #ok(balance);
+    };
+
+    private func _addBalance(principal: Principal, amount: Nat) {
+      let old_balance = _getBalanceOf(principal);
+      Map.set(balanceOf, Map.thash, Principal.toText(principal), old_balance + amount);
+    };
+
+    private func _subtractBalance(principal: Principal, amount: Nat) {
+      let old_balance = _getBalanceOf(principal);
+      let new_balance: Int = old_balance - amount;
+      if(new_balance < 0) return;
+      Map.set(balanceOf, Map.thash, Principal.toText(principal), old_balance - amount);
+    };
+
+    public shared ({caller}) func deposit(amount: Nat) : async Result.Result<Nat, GeneralError> {
+      if (Principal.isAnonymous(caller)) return #err(#userNotAuthorized);
+      _addBalance(caller, amount);
+      #ok(0);
+    };
 
     type GetReportsResponse = Result.Result<[Report], GeneralError>;
     public query ({caller}) func getAllReports () : async GetReportsResponse {
@@ -128,6 +180,7 @@ shared ({caller = _owner}) actor class W3T () {
 
     public shared ({caller}) func submitReport(report: Report) : async GeneralResponse {
       if (Principal.isAnonymous(caller)) return #err(#userNotAuthorized);
+      if ((_getBalanceOf(caller)) < report.stakeAmount) return #err(#notEnoughBalance);
 
       let uuidGenerator = SourceV4.Source();
       let uuid = await uuidGenerator.new();
@@ -141,6 +194,7 @@ shared ({caller = _owner}) actor class W3T () {
       
       Map.set(addressReportMap, Map.thash, Principal.toText(caller), [uuidText]);
       Map.set(reports, Map.thash, uuidText, report);
+      _subtractBalance(caller, report.stakeAmount);
       return #ok(uuidText);
     };
 
@@ -194,4 +248,26 @@ shared ({caller = _owner}) actor class W3T () {
       return Principal.toText(caller);
     };
 
+    public shared ({caller}) func withdrawToken(amount: Nat) : async Result.Result<Nat, GeneralError> {
+      if (Principal.isAnonymous(caller)) return #err(#userNotAuthorized);
+      if (_getBalanceOf(caller) < amount) return #err(#notEnoughBalance);
+
+      let transferRes = await w3tToken.icrc1_transfer({
+        from_subaccount = null;
+        to = { owner = caller; subaccount = null };
+        amount = amount;
+        fee = null;
+        memo = null;
+        created_at_time = null;
+      });
+
+      switch (transferRes) {
+        case (#Ok(block_height)) {
+            return #ok(block_height); // Return the block height if successful
+        };
+        case (#Err(err)) {
+            return #err(#withdrawFailed); // Return error message
+        };
+    };
+    }
 }
