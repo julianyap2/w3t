@@ -52,6 +52,7 @@ shared ({caller = _owner}) actor class W3T () {
     stable var addressReportMap = Map.new<Text, [Text]>();
     stable var reports = Map.new<Text, Report>();
     stable var videosReportMap = Map.new<Text, [Blob]>();
+    stable var balanceOf = Map.new<Text, Nat>();
 
     type GeneralResponse = Result.Result<Text, GeneralError>;
     type GeneralError = {
@@ -59,6 +60,7 @@ shared ({caller = _owner}) actor class W3T () {
         #keyNotFound;
         #chunkNotFound;
         #indexOutOfBound;
+        #notEnoughBalance;
     };
 
     // ==============================================================================================================================
@@ -89,6 +91,39 @@ shared ({caller = _owner}) actor class W3T () {
     // };
 
     // ==============================================================================================================================
+    
+    private func _getBalanceOf(principal: Principal) : Nat {
+      let balance = switch(Map.get(balanceOf, Map.thash, Principal.toText(principal))) {
+        case(?balance) { balance };
+        case(null) { 0 };
+      };
+
+      return balance;
+    };
+
+    public shared ({caller}) func getMyBalance() : async Result.Result<Nat, GeneralError> {
+      if (Principal.isAnonymous(caller)) return #err(#userNotAuthorized);
+      let balance = _getBalanceOf(caller);
+      #ok(balance);
+    };
+
+    private func _addBalance(principal: Principal, amount: Nat) {
+      let old_balance = _getBalanceOf(principal);
+      Map.set(balanceOf, Map.thash, Principal.toText(principal), old_balance + amount);
+    };
+
+    private func _subtractBalance(principal: Principal, amount: Nat) {
+      let old_balance = _getBalanceOf(principal);
+      let new_balance: Int = old_balance - amount;
+      if(new_balance < 0) return;
+      Map.set(balanceOf, Map.thash, Principal.toText(principal), old_balance - amount);
+    };
+
+    public shared ({caller}) func deposit(amount: Nat) : async Result.Result<Nat, GeneralError> {
+      if (Principal.isAnonymous(caller)) return #err(#userNotAuthorized);
+      _addBalance(caller, amount);
+      #ok(0);
+    };
 
     type GetReportsResponse = Result.Result<[Report], GeneralError>;
     public query ({caller}) func getAllReports () : async GetReportsResponse {
@@ -128,6 +163,7 @@ shared ({caller = _owner}) actor class W3T () {
 
     public shared ({caller}) func submitReport(report: Report) : async GeneralResponse {
       if (Principal.isAnonymous(caller)) return #err(#userNotAuthorized);
+      if ((_getBalanceOf(caller)) < report.stakeAmount) return #err(#notEnoughBalance);
 
       let uuidGenerator = SourceV4.Source();
       let uuid = await uuidGenerator.new();
@@ -141,6 +177,7 @@ shared ({caller = _owner}) actor class W3T () {
       
       Map.set(addressReportMap, Map.thash, Principal.toText(caller), [uuidText]);
       Map.set(reports, Map.thash, uuidText, report);
+      _subtractBalance(caller, report.stakeAmount);
       return #ok(uuidText);
     };
 
