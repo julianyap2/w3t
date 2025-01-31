@@ -86,7 +86,7 @@ export default function IcConnectPage() {
   //   console.log("Video successfully uploaded!");
   // }
 
-  var video: File;
+  const [video, setVideo] = useState<File>();
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -95,7 +95,7 @@ export default function IcConnectPage() {
         console.log("File content:", e.target?.result);
       };
       reader.readAsText(file); // You can also use readAsArrayBuffer or readAsDataURL
-      video = file;
+      setVideo(file);
     }
   };
 
@@ -108,7 +108,7 @@ export default function IcConnectPage() {
     const CHUNK_SIZE = 200000; // 0.2MB
 
     const reader = new FileReader();
-    reader.readAsArrayBuffer(video);
+    reader.readAsArrayBuffer(video!);
     reader.onload = async () => {
       const fileBytes = new Uint8Array(reader.result as ArrayBuffer);
       const fileSize: number = fileBytes.length;
