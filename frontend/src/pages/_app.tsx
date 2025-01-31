@@ -40,7 +40,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
           <link rel="shortcut icon" href="/favicon.svg" />
         </Head>
         <Notifications />
-        <Layout>
+        <Layout client={client}>
           <Component {...pageProps} />
         </Layout>
       </MantineProvider>

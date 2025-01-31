@@ -1,4 +1,4 @@
-import { Box } from "@mantine/core";
+import { Box, Chip, Menu } from "@mantine/core";
 import dayjs from "dayjs";
 import { type MRT_ColumnDef, MantineReactTable, useMantineReactTable } from "mantine-react-table";
 import { useEffect, useMemo, useState } from "react";
@@ -6,9 +6,11 @@ import { LogoutButton, useAuth, useCandidActor, useIdentities } from "@bundly/ar
 import { CandidActors } from "@app/canisters";
 import { useRouter } from "next/router";
 import type { Report } from "../../declarations/w3t/w3t.did";
+import { Principal } from '@dfinity/principal';
 const listReport = () => {
   const { isAuthenticated, currentIdentity, changeCurrentIdentity } = useAuth();
   const router = useRouter();
+  const [role, setRole] = useState<string>("police")
   const [reports, setReports] = useState<Report[] | undefined>(undefined);
   const w3t = useCandidActor<CandidActors>("w3t", currentIdentity, {
     canisterId: process.env.NEXT_PUBLIC_TEST_CANISTER_ID,
@@ -21,8 +23,7 @@ const listReport = () => {
   async function getReports() {
     try {
       const response = await w3t.getAllReports();
-        console.log("current identity" + currentIdentity)
-        console.log(isAuthenticated)
+      console.log(currentIdentity)
       if ("err" in response) {
         if ("userNotAuthorized" in response.err) console.log("User Not Authorized");
         else console.log("Error fetching Report");
@@ -35,6 +36,37 @@ const listReport = () => {
       console.error({ error });
     }
   }
+// Example Principal instances
+const examplePrincipal1 = Principal.fromText('2vxsx-fae');
+const examplePrincipal2 = Principal.fromText('aaaaa-aa');
+  const mockReports: Report[] = [
+    {
+      status: { NotGuilty: null },
+      rewardAmount: BigInt(1000),
+      rewardPaidAt: [],
+      stakeAmount: BigInt(500),
+      submittedAt: [BigInt(Date.now())],
+      policeReportNumber: ['PR12345'],
+      licenseNumber: 'ABC123',
+      validatedAt: [BigInt(Date.now())],
+      reporter: examplePrincipal1,
+      violationType: { LLAJ222009_283: null },
+      police: examplePrincipal2,
+    },
+    {
+      status: { OnValidationProcess: null },
+      rewardAmount: BigInt(2000),
+      rewardPaidAt: [],
+      stakeAmount: BigInt(750),
+      submittedAt: [BigInt(Date.now())],
+      policeReportNumber: ['PR67890'],
+      licenseNumber: 'XYZ789',
+      validatedAt: [],
+      reporter: examplePrincipal2,
+      violationType: { LLAJ222009_287: null },
+      police: examplePrincipal1,
+    }
+  ];
 
   const columns = useMemo<MRT_ColumnDef<Report>[]>(
     () => [
@@ -45,24 +77,58 @@ const listReport = () => {
       {
         accessorKey: "status",
         header: "Status",
+        Cell: ({ renderedCellValue, row } : {renderedCellValue : any, row: any}) => {
+            if("GuiltyFinePaid" in renderedCellValue){
+                return(
+                    <Chip defaultChecked color="green">Guilty Fine Paid</Chip>
+                )
+            }else if("GuiltyWaitingForFineToBePaid" in renderedCellValue){
+                return(
+                    <Chip defaultChecked color="orange">Guilty Waiting For Fine To Be Paid</Chip>
+                )
+            }else if("OnValidationProcess" in renderedCellValue){
+                return(
+                    <Chip defaultChecked color="yellow">On Validation Process</Chip>
+                )
+            }else{
+                return(
+                    <Chip defaultChecked color="gray">Not Guilty</Chip>
+                )
+            }
+        },
       },
       {
         accessorKey: "violationType",
         header: "Violation Type",
+        Cell: ({ renderedCellValue, row } : {renderedCellValue : any, row: any}) => {
+            if("LLAJ222009_283" in renderedCellValue){
+                return(
+                    <Box color="green">LLAJ222009_283</Box>
+                )
+            }else if("LLAJ222009_287" in renderedCellValue){
+                return(
+                    <Box color="orange">LLAJ222009_287</Box>
+                )
+            }else{
+                return(
+                    <Box color="gray">LLAJ222009_291</Box>
+                )
+            }
+        },
       },
       {
         accessorKey: "submittedAt",
         header: "Submitted At",
-        // Cell: ({ renderedCellValue, row }) => (
-        //   <Box
-        //     style={{
-        //       display: "flex",
-        //       alignItems: "center",
-        //       gap: "16px",
-        //     }}>
-        //     {dayjs.unix(renderedCellValue).format("DD-MM-YYYY HH:mm:ss")}
-        //   </Box>
-        // ),
+        Cell: ({ renderedCellValue, row } : {renderedCellValue : any, row: any}) => (
+          <Box
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "16px",
+            }}>
+            {dayjs.unix(renderedCellValue).format("DD-MM-YYYY HH:mm:ss")}
+          </Box>
+        ),
       },
       {
         accessorKey: "stakeAmount",
@@ -72,6 +138,27 @@ const listReport = () => {
     []
   );
 
+  const policeTable = useMantineReactTable({
+    columns,
+    data: mockReports,
+    enablePagination: false,
+    enableRowActions: true,
+    renderRowActionMenuItems: ({ row }) => (
+      <>
+        <Menu.Item onClick={() => console.info('Detail')}>Detail</Menu.Item>
+      </>
+    ),
+    // enableBottomToolbar: false
+  });
+
+  
+  const userTable = useMantineReactTable({
+    columns,
+    data: mockReports,
+    enablePagination: false,
+    // enableBottomToolbar: false
+  });
+
   return (
     <Box
       className="centerContainer"
@@ -79,12 +166,22 @@ const listReport = () => {
         paddingTop: "40px",
       }}
     >
-      {reports && reports.length > 0 && (
+      {/* {reports && reports.length > 0 && (
         <MantineReactTable
           columns={columns}
           data={reports}
         />
-      )}
+      )} */}
+
+      {role === "police" ?
+        <MantineReactTable
+            table={policeTable}
+        />
+        :
+        <MantineReactTable
+            table={userTable}
+        />
+      }
     </Box>
   );
 };

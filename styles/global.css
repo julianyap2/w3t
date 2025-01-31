@@ -3,3 +3,7 @@
     width: 100%;
     margin: 0 auto;
 }
+
+.mantine-Chip-iconWrapper{
+    display: none !important;
+}
