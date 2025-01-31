@@ -2,45 +2,14 @@ import { Box } from "@mantine/core";
 import dayjs from "dayjs";
 import { type MRT_ColumnDef, MantineReactTable, useMantineReactTable } from "mantine-react-table";
 import { useEffect, useMemo, useState } from "react";
-
 import { LogoutButton, useAuth, useCandidActor, useIdentities } from "@bundly/ares-react";
-
 import { CandidActors } from "@app/canisters";
 import { useRouter } from "next/router";
-
-type ViolationType = { LLAJ222009_283: null } | { LLAJ222009_287: null } | { LLAJ222009_291: null };
-
-type ReportStatus =
-  | { GuiltyFinePaid: null }
-  | { GuiltyWaitingForFineToBePaid: null }
-  | { OnValidationProcess: null }
-  | { NotGuilty: null };
-
-interface Report {
-  status: ReportStatus;
-  rewardAmount: bigint;
-  rewardPaidAt: [] | [bigint];
-  stakeAmount: bigint;
-  submittedAt: [] | [bigint];
-  policeReportNumber: [] | [string];
-  licenseNumber: string;
-  validatedAt: [] | [bigint];
-  reporter: string;
-  violationType: ViolationType;
-  police: string;
-}
-
-// const data: Report[] =[
-//     {
-//         // status: 'NotGuilty',
-
-//     }
-// ]
-
+import type { Report } from "../../declarations/w3t/w3t.did";
 const listReport = () => {
   const { isAuthenticated, currentIdentity, changeCurrentIdentity } = useAuth();
-    const router = useRouter();
-  const [report, setReport] = useState<any>();
+  const router = useRouter();
+  const [reports, setReports] = useState<Report[] | undefined>(undefined);
   const w3t = useCandidActor<CandidActors>("w3t", currentIdentity, {
     canisterId: process.env.NEXT_PUBLIC_TEST_CANISTER_ID,
   }) as CandidActors["w3t"];
@@ -52,15 +21,16 @@ const listReport = () => {
   async function getReports() {
     try {
       const response = await w3t.getAllReports();
-
+        console.log("current identity" + currentIdentity)
+        console.log(isAuthenticated)
       if ("err" in response) {
-        if ("userNotAuthorized" in response.err) router.push("/");
+        if ("userNotAuthorized" in response.err) console.log("User Not Authorized");
         else console.log("Error fetching Report");
       }
 
-      const Report = "ok" in response ? response.ok : undefined;
-      console.log(Report);
-      setReport(Report);
+      const reportList = "ok" in response ? response.ok : undefined;
+      console.log(reportList);
+      setReports(reportList);
     } catch (error) {
       console.error({ error });
     }
@@ -69,7 +39,7 @@ const listReport = () => {
   const columns = useMemo<MRT_ColumnDef<Report>[]>(
     () => [
       {
-        accessorKey: "licenseNumber", //access nested data with dot notation
+        accessorKey: "licenseNumber", // Access nested data with dot notation
         header: "License Number",
       },
       {
@@ -101,20 +71,22 @@ const listReport = () => {
     ],
     []
   );
-//   const table = useMantineReactTable({
-//     columns,
-//     report,
-//   });
-    return (
-        <Box 
-            className="centerContainer"
-            style={{
-                paddingTop: "40px"
-            }}
-        >
-            {/* {report.length > 0 && <MantineReactTable table={table} />} */}
-        </Box>
-    );
+
+  return (
+    <Box
+      className="centerContainer"
+      style={{
+        paddingTop: "40px",
+      }}
+    >
+      {reports && reports.length > 0 && (
+        <MantineReactTable
+          columns={columns}
+          data={reports}
+        />
+      )}
+    </Box>
+  );
 };
 
 export default listReport;
