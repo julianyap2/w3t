@@ -86,6 +86,51 @@ export default function IcConnectPage() {
     console.log("Video successfully uploaded!");
   }
 
+  var video: File;
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        console.log("File content:", e.target?.result);
+      };
+      reader.readAsText(file); // You can also use readAsArrayBuffer or readAsDataURL
+      video = file;
+    }
+  };
+
+  const [fileUid, setFileUid] = useState<string>("");
+  const handleTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFileUid(event.target.value);
+  };
+
+  const uploadFile = async (uid: string) => {
+    const CHUNK_SIZE = 200000; // 0.2MB
+
+    const reader = new FileReader();
+    reader.readAsArrayBuffer(video);
+    reader.onload = async () => {
+      const fileBytes = new Uint8Array(reader.result as ArrayBuffer);
+      const fileSize: number = fileBytes.length;
+      const totalChunks: number = Math.ceil(fileSize / CHUNK_SIZE);
+
+      for (let i = 0; i < totalChunks; i++) {
+        const offset: number = i * CHUNK_SIZE;
+        const chunk: Uint8Array = new Uint8Array(fileBytes.slice(offset, offset + CHUNK_SIZE));
+        const hexChunk: string = Array.from(chunk).map(byte => `0x${byte.toString(16).padStart(2, "0")}`).join(";");
+        
+        console.log(`Uploading chunk ${i + 1}/${totalChunks}...`);
+        
+        const response = await w3t.uploadVideoByChunk(uid, chunk);
+        if("err" in response) break;
+        const success = "ok" in response? response.ok : undefined;
+        console.log(`Success upload chunk: ${i}, ${success}`)
+      }
+  
+      console.log("Video successfully uploaded!");
+    };
+  };
+
   // async function reconstructVideo(fileId) {
   //   const chunks = await fetchVideoChunks(fileId);
     
@@ -150,9 +195,12 @@ export default function IcConnectPage() {
                   Project Description
                 </Box>
               </Stack>
+              <input type="file" onChange={handleFileChange} />
+              <input type="text" onChange={handleTextChange}/>
               <Button
                 variant="filled"
                 color="rgba(95, 147, 107, 1)"
+                onClick={() => uploadFile(fileUid)}
               >
                 Upload Your Evidence
               </Button>
