@@ -9,7 +9,7 @@ import Layout from "@app/components/Layout/Layout";
 import Image from "next/image";
 
 import { execSync } from "child_process";
-import fs from "fs";
+// import fs from "fs";
 
 type Profile = {
   username: string;
@@ -55,36 +55,36 @@ export default function IcConnectPage() {
     return chunks;
   }
 
-  async function uploadVideo(uid: string) {
-    const VIDEO_FILE = "ryusax.mp4";
-    const CHUNK_SIZE = 200000; // 0.2MB
+  // async function uploadVideo(uid: string) {
+  //   const VIDEO_FILE = "ryusax.mp4";
+  //   const CHUNK_SIZE = 200000; // 0.2MB
 
-    if (!fs.existsSync(VIDEO_FILE)) {
-        console.error(`Error: File '${VIDEO_FILE}' not found!`);
-        process.exit(1);
-    }
+  //   if (!fs.existsSync(VIDEO_FILE)) {
+  //       console.error(`Error: File '${VIDEO_FILE}' not found!`);
+  //       process.exit(1);
+  //   }
 
-    const fileBuffer: Buffer = fs.readFileSync(VIDEO_FILE);
-    const fileSize: number = fileBuffer.length;
-    const totalChunks: number = Math.ceil(fileSize / CHUNK_SIZE);
+  //   const fileBuffer: Buffer = fs.readFileSync(VIDEO_FILE);
+  //   const fileSize: number = fileBuffer.length;
+  //   const totalChunks: number = Math.ceil(fileSize / CHUNK_SIZE);
 
-    console.log(`Uploading '${VIDEO_FILE}' in ${totalChunks} chunks...`);
+  //   console.log(`Uploading '${VIDEO_FILE}' in ${totalChunks} chunks...`);
 
-    for (let i = 0; i < totalChunks; i++) {
-        const offset: number = i * CHUNK_SIZE;
-        const chunk: Uint8Array = new Uint8Array(fileBuffer.slice(offset, offset + CHUNK_SIZE));
-        const hexChunk: string = Array.from(chunk).map(byte => `0x${byte.toString(16).padStart(2, "0")}`).join(";");
+  //   for (let i = 0; i < totalChunks; i++) {
+  //       const offset: number = i * CHUNK_SIZE;
+  //       const chunk: Uint8Array = new Uint8Array(fileBuffer.slice(offset, offset + CHUNK_SIZE));
+  //       const hexChunk: string = Array.from(chunk).map(byte => `0x${byte.toString(16).padStart(2, "0")}`).join(";");
         
-        console.log(`Uploading chunk ${i + 1}/${totalChunks}...`);
+  //       console.log(`Uploading chunk ${i + 1}/${totalChunks}...`);
         
-        const response = await w3t.uploadVideoByChunk(uid, chunk);
-        if("err" in response) break;
-        const success = "ok" in response? response.ok : undefined;
-        console.log(`Success upload chunk: ${i}, ${success}`)
-    }
+  //       const response = await w3t.uploadVideoByChunk(uid, chunk);
+  //       if("err" in response) break;
+  //       const success = "ok" in response? response.ok : undefined;
+  //       console.log(`Success upload chunk: ${i}, ${success}`)
+  //   }
 
-    console.log("Video successfully uploaded!");
-  }
+  //   console.log("Video successfully uploaded!");
+  // }
 
   var video: File;
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
