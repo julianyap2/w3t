@@ -147,6 +147,14 @@ shared ({caller = _owner}) actor class W3T(
       return collectedReports;
     };
 
+    public shared func getViolationDescriptions() : async Result.Result<[(Text, Text)], GeneralError> {
+      var violationDescriptions = Map.new<Text, Text>();
+      Map.set(violationDescriptions, Map.thash, "LLAJ222009_291", "Tidak pakai helm");
+      Map.set(violationDescriptions, Map.thash, "LLAJ222009_287", "Parkir sembarangan");
+      Map.set(violationDescriptions, Map.thash, "LLAJ222009_283", "Melanggar rambu");
+      
+      return #ok(Iter.toArray(Map.entries(violationDescriptions)));
+    };
 
     public shared ({caller}) func submitReport(report: Report) : async TextResponse {
       if (Principal.isAnonymous(caller)) return #err(#userNotAuthorized);

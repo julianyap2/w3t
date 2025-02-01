@@ -8,6 +8,9 @@ import { Box, Button, Grid, Stack } from "@mantine/core";
 import Layout from "@app/components/Layout/Layout";
 import Image from "next/image";
 
+import ReportFormDialog from "./report-form-dialog";
+import { GREEN_PRIMARY } from "@app/constants/colors";
+
 type Profile = {
   username: string;
   bio: string;
@@ -18,8 +21,9 @@ export default function IcConnectPage() {
   const identities = useIdentities();
   const [profile, setProfile] = useState<Profile | undefined>();
   const [loading, setLoading] = useState(false); // State for loader
+  const [isShowReportForm, setIsShowReportForm] = useState(false);
   const w3t = useCandidActor<CandidActors>("w3t", currentIdentity, {
-    canisterId: process.env.NEXT_PUBLIC_TEST_CANISTER_ID,
+    canisterId: process.env.NEXT_PUBLIC_W3T_CANISTER_ID,
   }) as CandidActors["w3t"];
 
   useEffect(() => {
@@ -74,6 +78,10 @@ export default function IcConnectPage() {
   //   }
   // }
 
+  function showReportFormDialog() {
+    setIsShowReportForm(true);
+  }
+
   return (
     <Box className={styles.allContainer}>
       <Box className="centerContainer">
@@ -103,7 +111,8 @@ export default function IcConnectPage() {
               </Stack>
               <Button
                 variant="filled"
-                color="rgba(95, 147, 107, 1)"
+                color={GREEN_PRIMARY}
+                onClick={() => showReportFormDialog()}
               >
                 Upload Your Evidence
               </Button>
@@ -156,7 +165,7 @@ export default function IcConnectPage() {
                 </Stack>
                 <Button
                   variant="filled"
-                  color="rgba(95, 147, 107, 1)"
+                  color={GREEN_PRIMARY}
                 >
                   Get Yours
                 </Button>
@@ -164,6 +173,7 @@ export default function IcConnectPage() {
             </Grid.Col>
         </Grid>
       </Box>
+      <ReportFormDialog isShown={isShowReportForm} onClose={() => setIsShowReportForm(false)}/>
       {/* <main className="p-6">
         <div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-8">
