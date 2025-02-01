@@ -43,7 +43,7 @@ const listReport = () => {
         else console.log("Error fetching Report");
       }
 
-      const reportList = "ok" in response ? response.ok : undefined;
+      const reportList: any = "ok" in response ? response.ok : undefined;
       console.log(reportList);
       setReports(reportList);
     } catch (error) {

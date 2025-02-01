@@ -1,10 +1,18 @@
 import { Box, Chip, Grid } from "@mantine/core"
 import type { Report } from "../../declarations/w3t/w3t.did";
 import dayjs from "dayjs";
+import { useAuth, useCandidActor } from "@bundly/ares-react";
+import { CandidActors } from "@app/canisters";
 
 
 
 const DetailReport = ({detailData} : {detailData: Report}) => {
+    
+    const { isAuthenticated, currentIdentity, changeCurrentIdentity } = useAuth();
+    const w3t = useCandidActor<CandidActors>("w3t", currentIdentity, {
+        canisterId: process.env.NEXT_PUBLIC_W3T_CANISTER_ID,
+    }) as CandidActors["w3t"];
+    
     const statusChecker = () => {
         if("GuiltyFinePaid" in detailData.status){
             return(
@@ -40,6 +48,21 @@ const DetailReport = ({detailData} : {detailData: Report}) => {
             )
         }
     }
+
+  async function fetchVideoChunks(fileId: string) {
+    let chunks = [];
+    let index: bigint = BigInt(0);
+
+    while (true) {
+        const response = await w3t.getVideoChunk(fileId, index);
+        if("err" in response) break;
+        const chunk = "ok" in response? response.ok : undefined;
+        chunks.push(chunk);
+        index++;
+    }
+    console.log(chunks)
+    return chunks;
+  }
 
     return(
         <Box>
