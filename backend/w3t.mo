@@ -8,6 +8,7 @@ import Result "mo:base/Result";
 import Time "mo:base/Time";
 import Array "mo:base/Array";
 import Int8 "mo:base/Int8";
+import Debug "mo:base/Debug";
 import UUID "mo:uuid/UUID";
 import ICRC "./ICRC";
 import SourceV4 "mo:uuid/async/SourceV4";
@@ -112,35 +113,37 @@ shared ({caller = _owner}) actor class W3T(
 
     // ==============================================================================================================================
 
-    type GetReportsResponse = Result.Result<[Report], GeneralError>;
+    type GetReportsResponse = Result.Result<[(Text, Report)], GeneralError>;
     public query ({caller}) func getAllReports () : async GetReportsResponse {
       if (Principal.isAnonymous(caller)) return #err(#userNotAuthorized);
 
-      let reportsIter = Map.vals(reports);
-      return #ok(Iter.toArray(reportsIter));
+      let uidIter = Map.keys(reports);
+      let uidArray: [Text] = Iter.toArray(uidIter);
+
+      return #ok(collectReports(uidArray));
     }; 
 
-    public query ({caller}) func getAllReportsWithPagination () : async GetReportsResponse {
+    public query ({caller}) func getAllVideos () : async Result.Result<[[Blob]], GeneralError> {
       if (Principal.isAnonymous(caller)) return #err(#userNotAuthorized);
 
-      let reportsIter = Map.vals(reports);
-      return #ok(Iter.toArray(reportsIter));
+      let videosIter = Map.vals(videosReportMap);
+      return #ok(Iter.toArray(videosIter));
     }; 
 
-    public query ({caller}) func getMyReports (pagination: ?Int8, section: ?Int8) : async GetReportsResponse {
+    public query ({caller}) func getMyReports () : async GetReportsResponse {
       if (Principal.isAnonymous(caller)) return #err(#userNotAuthorized);
 
       switch (Map.get(addressReportMap, Map.thash, Principal.toText(caller))) {
-        case (?_uids) { return #ok(collectReports(_uids, pagination, section)); };
+        case (?_uids) { return #ok(collectReports(_uids)); };
         case null { return #ok([]); };
       };
     };
 
-    func collectReports(uids: [Text], pagination: ?Int8, section: ?Int8) : [Report] {
-      var collectedReports: [Report] = [];
+    func collectReports(uids: [Text]) : [(Text, Report)] {
+      var collectedReports: [(Text, Report)] = [];
       for (uid in uids.vals()) {
         switch (Map.get(reports, Map.thash, uid)) {
-          case (?report) { collectedReports := Array.append(collectedReports, [report]); };
+          case (?report) { collectedReports := Array.append(collectedReports, [(uid, report)]); };
           case null {};
         };
       };
@@ -173,19 +176,31 @@ shared ({caller = _owner}) actor class W3T(
       if (Principal.isAnonymous(caller)) return #err(#userNotAuthorized);
 
       switch (Map.get(addressReportMap, Map.thash, Principal.toText(caller))) {
-        case (?_) {  };
+        case (?_uids) { 
+          switch (Array.find(_uids, func (_uid: Text): Bool { _uid == uid })) {
+            case (?_found) {  };
+            case null { return #err(#keyNotFound); };
+          };
+        };
         case null { return #err(#keyNotFound); };
       };
-
+      
+      var returnedText: Text = "";
       var videoChunks: [Blob] = switch (Map.get(videosReportMap, Map.thash, uid)) {
-        case(?_chunks) { _chunks; };
-        case null { []; };
+        case(?_chunks) { 
+          returnedText := Nat.toText(_chunks.size());
+          _chunks; 
+        };
+        case null { 
+          returnedText := "Chunks not found, returning empty string";
+          []; 
+        };
       };      
 
       videoChunks := Array.append(videoChunks, [chunk]);
       Map.set(videosReportMap, Map.thash, uid, videoChunks);
 
-      return #ok("Chunk uploaded.");
+      return #ok(returnedText);
     };
 
     public shared ({caller}) func deleteVideo(uid: Text) : async TextResponse {

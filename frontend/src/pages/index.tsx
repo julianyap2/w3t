@@ -8,6 +8,9 @@ import { Box, Button, Grid, Stack } from "@mantine/core";
 import Layout from "@app/components/Layout/Layout";
 import Image from "next/image";
 
+import { execSync } from "child_process";
+// import fs from "fs";
+
 type Profile = {
   username: string;
   bio: string;
@@ -19,7 +22,7 @@ export default function IcConnectPage() {
   const [profile, setProfile] = useState<Profile | undefined>();
   const [loading, setLoading] = useState(false); // State for loader
   const w3t = useCandidActor<CandidActors>("w3t", currentIdentity, {
-    canisterId: process.env.NEXT_PUBLIC_TEST_CANISTER_ID,
+    canisterId: process.env.NEXT_PUBLIC_W3T_CANISTER_ID,
   }) as CandidActors["w3t"];
 
   useEffect(() => {
@@ -36,6 +39,114 @@ export default function IcConnectPage() {
   function disableIdentityButton(identityButton: Identity): boolean {
     return currentIdentity.getPrincipal().toString() === identityButton.getPrincipal().toString();
   }
+
+  async function fetchVideoChunks(fileId: string) {
+    let chunks = [];
+    let index: bigint = BigInt(0);
+
+    while (true) {
+        const response = await w3t.getVideoChunk(fileId, index);
+        if("err" in response) break;
+        const chunk = "ok" in response? response.ok : undefined;
+        chunks.push(chunk);
+        index++;
+    }
+    console.log(chunks)
+    return chunks;
+  }
+
+  // async function uploadVideo(uid: string) {
+  //   const VIDEO_FILE = "ryusax.mp4";
+  //   const CHUNK_SIZE = 200000; // 0.2MB
+
+  //   if (!fs.existsSync(VIDEO_FILE)) {
+  //       console.error(`Error: File '${VIDEO_FILE}' not found!`);
+  //       process.exit(1);
+  //   }
+
+  //   const fileBuffer: Buffer = fs.readFileSync(VIDEO_FILE);
+  //   const fileSize: number = fileBuffer.length;
+  //   const totalChunks: number = Math.ceil(fileSize / CHUNK_SIZE);
+
+  //   console.log(`Uploading '${VIDEO_FILE}' in ${totalChunks} chunks...`);
+
+  //   for (let i = 0; i < totalChunks; i++) {
+  //       const offset: number = i * CHUNK_SIZE;
+  //       const chunk: Uint8Array = new Uint8Array(fileBuffer.slice(offset, offset + CHUNK_SIZE));
+  //       const hexChunk: string = Array.from(chunk).map(byte => `0x${byte.toString(16).padStart(2, "0")}`).join(";");
+        
+  //       console.log(`Uploading chunk ${i + 1}/${totalChunks}...`);
+        
+  //       const response = await w3t.uploadVideoByChunk(uid, chunk);
+  //       if("err" in response) break;
+  //       const success = "ok" in response? response.ok : undefined;
+  //       console.log(`Success upload chunk: ${i}, ${success}`)
+  //   }
+
+  //   console.log("Video successfully uploaded!");
+  // }
+
+  const [video, setVideo] = useState<File>();
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        console.log("File content:", e.target?.result);
+      };
+      reader.readAsText(file); // You can also use readAsArrayBuffer or readAsDataURL
+      setVideo(file);
+    }
+  };
+
+  const [fileUid, setFileUid] = useState<string>("");
+  const handleTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFileUid(event.target.value);
+  };
+
+  const uploadFile = async (uid: string) => {
+    const CHUNK_SIZE = 200000; // 0.2MB
+
+    const reader = new FileReader();
+    reader.readAsArrayBuffer(video!);
+    reader.onload = async () => {
+      const fileBytes = new Uint8Array(reader.result as ArrayBuffer);
+      const fileSize: number = fileBytes.length;
+      const totalChunks: number = Math.ceil(fileSize / CHUNK_SIZE);
+
+      for (let i = 0; i < totalChunks; i++) {
+        const offset: number = i * CHUNK_SIZE;
+        const chunk: Uint8Array = new Uint8Array(fileBytes.slice(offset, offset + CHUNK_SIZE));
+        const hexChunk: string = Array.from(chunk).map(byte => `0x${byte.toString(16).padStart(2, "0")}`).join(";");
+        
+        console.log(`Uploading chunk ${i + 1}/${totalChunks}...`);
+        
+        const response = await w3t.uploadVideoByChunk(uid, chunk);
+        if("err" in response) break;
+        const success = "ok" in response? response.ok : undefined;
+        console.log(`Success upload chunk: ${i}, ${success}`)
+      }
+  
+      console.log("Video successfully uploaded!");
+    };
+  };
+
+  // async function reconstructVideo(fileId) {
+  //   const chunks = await fetchVideoChunks(fileId);
+    
+  //   if (chunks.length === 0) {
+  //       console.error("No video chunks found.");
+  //       return null;
+  //   }
+
+  //   // Merge chunks into a single Blob
+  //   const mergedBlob = new Blob(chunks, { type: "video/mp4" });
+
+  //   // Create a URL for the Blob
+  //   const videoURL = URL.createObjectURL(mergedBlob);
+
+  //   return videoURL;
+  // }
 
   async function getProfile() {
     try {
@@ -54,25 +165,8 @@ export default function IcConnectPage() {
     }
   }
 
-  // async function registerProfile(username: string, bio: string) {
-  //   try {
-  //     setLoading(true); // Show loader
-  //     const response = await test.createProfile(username, bio);
-
-  //     if ("err" in response) {
-  //       if ("userNotAuthenticated" in response.err) alert("User not authenticated");
-  //       if ("profileAlreadyExists" in response.err) alert("Profile already exists");
-
-  //       throw new Error("Error creating profile");
-  //     }
-
-  //     setProfile({ username, bio });
-  //   } catch (error) {
-  //     console.error({ error });
-  //   } finally {
-  //     setLoading(false); // Hide loader
-  //   }
-  // }
+  // MARK -- DELETE LATER
+  fetchVideoChunks("A");
 
   return (
     <Box className={styles.allContainer}>
@@ -101,9 +195,12 @@ export default function IcConnectPage() {
                   Project Description
                 </Box>
               </Stack>
+              <input type="file" onChange={handleFileChange} />
+              <input type="text" onChange={handleTextChange}/>
               <Button
                 variant="filled"
                 color="rgba(95, 147, 107, 1)"
+                onClick={() => uploadFile(fileUid)}
               >
                 Upload Your Evidence
               </Button>
