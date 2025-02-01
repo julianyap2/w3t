@@ -1,18 +1,20 @@
 import { Box, Chip, Grid } from "@mantine/core"
-import type { Report } from "../../declarations/w3t/w3t.did";
+import type { Report, UidReport } from "../../declarations/w3t/w3t.did";
 import dayjs from "dayjs";
 import { useAuth, useCandidActor } from "@bundly/ares-react";
 import { CandidActors } from "@app/canisters";
 
 
 
-const DetailReport = ({detailData} : {detailData: Report}) => {
+const DetailReport = ({detailDataArray} : {detailDataArray: UidReport}) => {
     
     const { isAuthenticated, currentIdentity, changeCurrentIdentity } = useAuth();
     const w3t = useCandidActor<CandidActors>("w3t", currentIdentity, {
         canisterId: process.env.NEXT_PUBLIC_W3T_CANISTER_ID,
     }) as CandidActors["w3t"];
-    
+
+    let detailData: Report = detailDataArray[1]
+
     const statusChecker = () => {
         if("GuiltyFinePaid" in detailData.status){
             return(
@@ -138,6 +140,12 @@ const DetailReport = ({detailData} : {detailData: Report}) => {
                         dayjs.unix(detailData.submittedAt[0] != undefined ? Number(detailData.submittedAt[0]) : 0).format("DD-MM-YYYY HH:mm:ss") :
                         "-"
                     }
+                </Grid.Col>
+                <Grid.Col span={{base:12, xs:6}}>
+                    UUID
+                </Grid.Col>
+                <Grid.Col span={{base:12, xs:6}}>
+                    {detailDataArray[0]}
                 </Grid.Col>
             </Grid>
             
