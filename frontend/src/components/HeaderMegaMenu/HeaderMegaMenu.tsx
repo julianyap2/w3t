@@ -32,6 +32,7 @@ import {
 import { InternetIdentityButton } from '@bundly/ares-react';
 import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
   
   const mockdata = [
     {
@@ -69,6 +70,7 @@ import { useRouter } from 'next/router';
   export function HeaderMegaMenu({ client } : {client: any}) {
     const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
     const [linksOpened, { toggle: toggleLinks }] = useDisclosure(false);
+    const [principalId, setPrincipalId] = useState("");
     const theme = useMantineTheme();
     const router = useRouter()
     const links = mockdata.map((item) => (
@@ -89,6 +91,22 @@ import { useRouter } from 'next/router';
       </UnstyledButton>
     ));
 
+    const isPlugExtensionExist = !!window.ic?.plug;
+    const plugExtension = window.ic!.plug;
+
+    useEffect(() => {
+      init();
+    }, []);
+
+    async function init() {
+      if(isPlugExtensionExist) {
+        const isConnected = await window.ic!.plug.isConnected();
+          if(isConnected){
+            setPrincipalId(window.ic!.plug.principalId);
+          }
+      }
+    }
+
     function detectBrowser() {
       const userAgent = navigator.userAgent.toLowerCase();
       if (userAgent.indexOf('chrome') > -1 && userAgent.indexOf('edge') === -1 && userAgent.indexOf('safari') > -1) {
@@ -103,10 +121,7 @@ import { useRouter } from 'next/router';
         return 'other';
       }
     }
-    function onLogin() {
-      const provider = client.getProvider("internet-identity");
-      provider.connect();
-    }
+
     const handleClick = async() => {
       const browser = detectBrowser();
       
@@ -116,16 +131,18 @@ import { useRouter } from 'next/router';
           // Chrome and Edge extension check
           try {
             // router.reload();
-            if(typeof window.ic !== "undefined" && window.ic.infinityWallet){
-              if(await window.ic.infinityWallet.isConnected()){
-                console.log("test")
-                const provider = client.getProvider("internet-identity");
-                provider.connect();
-              }else{
-                await window.ic.infinityWallet.requestConnect();
+            
+            if(isPlugExtensionExist) {
+              const isConnected = await plugExtension.isConnected();
+              if(!isConnected) {
+                const whitelist: [string] = [process.env.NEXT_PUBLIC_W3T_CANISTER_ID!]
+                const req = await plugExtension.requestConnect({whitelist});
+                if(req) window.location.reload();
+              } else {
+                setPrincipalId(plugExtension.principalId);
               }
-            }else{
-              window.open("https://chromewebstore.google.com/detail/bitfinity-wallet/jnldfbidonfeldmalbflbmlebbipcnle", "_blank")
+            } else {
+              window.open("https://chromewebstore.google.com/detail/plug/cfbfdhimifdmdehjmkdobpcjfefblkjm", "_blank")
             }
             // await chrome.runtime.sendMessage('jnldfbidonfeldmalbflbmlebbipcnle', { type: 'checkExtension' }, (response) => {
             //   if (response && response.exists) {
@@ -239,7 +256,7 @@ import { useRouter } from 'next/router';
                 className={classes.buttonConnect}
                 w={200}
               >
-                Connect
+                {principalId !== "" ? `${principalId.slice(0, 5)}...${principalId.slice(-5)}` : "Connect" }
               </Button>
             </Group>
   
