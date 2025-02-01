@@ -6,12 +6,8 @@ import { CandidActors } from "@app/canisters";
 import { GREEN_PRIMARY } from "@app/constants/colors";
 
 
-interface ReportFormDialogProps {
-    isShown: boolean;
-    onClose: () => void;
-}
 
-const ReportFormDialog = ({ isShown, onClose}: ReportFormDialogProps ) => {
+const ReportFormDialog = () => {
     const { isAuthenticated, currentIdentity, changeCurrentIdentity } = useAuth();
     const w3t = useCandidActor<CandidActors>("w3t", currentIdentity, {
         canisterId: process.env.NEXT_PUBLIC_W3T_CANISTER_ID,
@@ -34,13 +30,9 @@ const ReportFormDialog = ({ isShown, onClose}: ReportFormDialogProps ) => {
     });
 
     useEffect(() => {
-        if(isShown) {
-            loadViolationDescriptions();
-        }
-
+        loadViolationDescriptions();
         reportForm.reset();
-        
-    }, [isShown]);
+    }, []);
 
     const loadViolationDescriptions = async () => {
         const res = await w3t.getViolationDescriptions();
@@ -98,62 +90,33 @@ const ReportFormDialog = ({ isShown, onClose}: ReportFormDialogProps ) => {
     }
 
     return (
-        <>
-            <Modal.Root
-                opened={isShown} 
-                onClose={onClose} 
-                size={"xl"}
-                styles={{
-                    title: {
-                        fontSize: "1.5rem",
-                        fontWeight: "bold",
-                    },
-                    body: {
-                        padding: "1 rem"
-                    }
-                }}
-                transitionProps={{transition: 'fade-up', duration: 400, timingFunction: 'ease-in-out'}}
-                centered
-            >
-                    <Modal.Overlay style={{
-                        backdropFilter: "blur(5px)"
-                    }}/>
-                    <Modal.Content p={20}>
-                        <Modal.Header>
-                            <Modal.Title>Report Form</Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>
-                            <Box>
-                                <form onSubmit={reportForm.onSubmit(handleSubmit)}>
-                                    <TextInput
-                                        label="License Number"
-                                        placeholder="Enter license plate number"
-                                        {...reportForm.getInputProps("licenseNumber")}
-                                    />
-                                    <Select
-                                        label="Violation Type"
-                                        placeholder="Select violation"
-                                        data={Object.values(violationTypeMap)}
-                                        {...reportForm.getInputProps("violationType")}
-                                    />
-                                    <FileInput
-                                        label="Upload Video Evidence"
-                                        placeholder="Select a video file"
-                                        accept="video/*"
-                                        {...reportForm.getInputProps("video")}
-                                    />
-                                    <Box style={{height: 50, display: "flex", alignItems: "flex-end", justifyContent: "center"}}>
-                                        { isSubmitting && "⚠️ Please do not close this page while submitting..."}
-                                    </Box>
-                                    <Button type="submit" fullWidth mt="md" color={GREEN_PRIMARY} loading={isSubmitting}>
-                                        Submit
-                                    </Button>
-                                </form>
-                            </Box>
-                        </Modal.Body>
-                    </Modal.Content>
-            </Modal.Root>
-        </>
+        <Box>
+            <form onSubmit={reportForm.onSubmit(handleSubmit)}>
+                <TextInput
+                    label="License Number"
+                    placeholder="Enter license plate number"
+                    {...reportForm.getInputProps("licenseNumber")}
+                />
+                <Select
+                    label="Violation Type"
+                    placeholder="Select violation"
+                    data={Object.values(violationTypeMap)}
+                    {...reportForm.getInputProps("violationType")}
+                />
+                <FileInput
+                    label="Upload Video Evidence"
+                    placeholder="Select a video file"
+                    accept="video/*"
+                    {...reportForm.getInputProps("video")}
+                />
+                <Box style={{height: 50, display: "flex", alignItems: "flex-end", justifyContent: "center"}}>
+                    { isSubmitting && "⚠️ Please do not close this page while submitting..."}
+                </Box>
+                <Button type="submit" fullWidth mt="md" color={GREEN_PRIMARY} loading={isSubmitting}>
+                    Submit
+                </Button>
+            </form>
+        </Box>
     );
 };
 

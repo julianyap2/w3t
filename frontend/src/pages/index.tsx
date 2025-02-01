@@ -8,8 +8,9 @@ import { Box, Button, Grid, Stack } from "@mantine/core";
 import Layout from "@app/components/Layout/Layout";
 import Image from "next/image";
 
-import ReportFormDialog from "./report-form-dialog";
+import ReportFormDialog from "@app/components/ReportFormDialog/ReportFormDialog";
 import { GREEN_PRIMARY } from "@app/constants/colors";
+import { modals } from "@mantine/modals";
 
 type Profile = {
   username: string;
@@ -29,6 +30,18 @@ export default function IcConnectPage() {
   useEffect(() => {
     getProfile();
   }, [currentIdentity]);
+
+  
+  const openModalForm = () => modals.openConfirmModal({
+    title: 'Report Form',
+    children: (
+      <ReportFormDialog  />
+    ),
+    size: 'lg',
+    labels: { confirm: 'Approve', cancel: 'Reject' },
+    onCancel: () => console.log('Cancel'),
+    onConfirm: () => console.log('Confirmed'),
+  });
 
   function formatPrincipal(principal: string): string {
     const parts = principal.split("-");
@@ -112,7 +125,7 @@ export default function IcConnectPage() {
               <Button
                 variant="filled"
                 color={GREEN_PRIMARY}
-                onClick={() => showReportFormDialog()}
+                onClick={() => openModalForm()}
               >
                 Upload Your Evidence
               </Button>
@@ -173,7 +186,6 @@ export default function IcConnectPage() {
             </Grid.Col>
         </Grid>
       </Box>
-      <ReportFormDialog isShown={isShowReportForm} onClose={() => setIsShowReportForm(false)}/>
       {/* <main className="p-6">
         <div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-8">
