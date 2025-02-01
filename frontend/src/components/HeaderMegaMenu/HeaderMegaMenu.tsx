@@ -66,7 +66,7 @@ import { useRouter } from 'next/router';
     },
   ];
   
-  export function HeaderMegaMenu() {
+  export function HeaderMegaMenu({ client } : {client: any}) {
     const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
     const [linksOpened, { toggle: toggleLinks }] = useDisclosure(false);
     const theme = useMantineTheme();
@@ -103,6 +103,10 @@ import { useRouter } from 'next/router';
         return 'other';
       }
     }
+    function onLogin() {
+      const provider = client.getProvider("internet-identity");
+      provider.connect();
+    }
     const handleClick = async() => {
       const browser = detectBrowser();
       
@@ -114,7 +118,9 @@ import { useRouter } from 'next/router';
             // router.reload();
             if(typeof window.ic !== "undefined" && window.ic.infinityWallet){
               if(await window.ic.infinityWallet.isConnected()){
-                
+                console.log("test")
+                const provider = client.getProvider("internet-identity");
+                provider.connect();
               }else{
                 await window.ic.infinityWallet.requestConnect();
               }
@@ -224,7 +230,8 @@ import { useRouter } from 'next/router';
             </Group>
   
             <Group visibleFrom="sm">
-              {/* <InternetIdentityButton>
+              {/* <InternetIdentityButton
+                >
                 Connect
               </InternetIdentityButton> */}
               <Button
