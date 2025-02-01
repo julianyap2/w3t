@@ -7,8 +7,6 @@ import Iter "mo:base/Iter";
 import Result "mo:base/Result";
 import Time "mo:base/Time";
 import Array "mo:base/Array";
-import Int8 "mo:base/Int8";
-import Debug "mo:base/Debug";
 import UUID "mo:uuid/UUID";
 import ICRC "./ICRC";
 import SourceV4 "mo:uuid/async/SourceV4";
@@ -172,19 +170,12 @@ shared ({caller = _owner}) actor class W3T(
       return #ok(uuidText);
     };
 
+    // ==============================================================================================================================
+
     public shared ({caller}) func uploadVideoByChunk(uid: Text, chunk: Blob) : async TextResponse {
       if (Principal.isAnonymous(caller)) return #err(#userNotAuthorized);
+      if (findUidBasedOnCaller(uid, caller) == false) { return #err(#keyNotFound); };
 
-      switch (Map.get(addressReportMap, Map.thash, Principal.toText(caller))) {
-        case (?_uids) { 
-          switch (Array.find(_uids, func (_uid: Text): Bool { _uid == uid })) {
-            case (?_found) {  };
-            case null { return #err(#keyNotFound); };
-          };
-        };
-        case null { return #err(#keyNotFound); };
-      };
-      
       var returnedText: Text = "";
       var videoChunks: [Blob] = switch (Map.get(videosReportMap, Map.thash, uid)) {
         case(?_chunks) { 
@@ -205,7 +196,8 @@ shared ({caller = _owner}) actor class W3T(
 
     public shared ({caller}) func deleteVideo(uid: Text) : async TextResponse {
       if (Principal.isAnonymous(caller)) return #err(#userNotAuthorized);
-
+      if (findUidBasedOnCaller(uid, caller) == false) { return #err(#keyNotFound); };
+      
       switch (Map.get(videosReportMap, Map.thash, uid)) {
         case (?_chunks) { 
           Map.set(videosReportMap, Map.thash, uid, []);
@@ -218,6 +210,7 @@ shared ({caller = _owner}) actor class W3T(
     type GetVideoChunkResponse = Result.Result<Blob, GeneralError>;
     public query ({caller}) func getVideoChunk(uid: Text, index: Nat) : async GetVideoChunkResponse {
       if (Principal.isAnonymous(caller)) return #err(#userNotAuthorized);
+      if (findUidBasedOnCaller(uid, caller) == false) { return #err(#keyNotFound); };
 
       switch (Map.get(videosReportMap, Map.thash, uid)) {
         case (?_chunks) { 
@@ -230,8 +223,16 @@ shared ({caller = _owner}) actor class W3T(
       };
     };
 
-    public query ({caller}) func getCallerPrincipalToText() : async Text {
-      return Principal.toText(caller);
+    func findUidBasedOnCaller(uid: Text, caller: Principal) : Bool {
+      switch (Map.get(addressReportMap, Map.thash, Principal.toText(caller))) {
+        case (?_uids) { 
+          switch (Array.find(_uids, func (_uid: Text): Bool { _uid == uid })) {
+            case (?_found) { return true };
+            case null { return false; };
+          };
+        };
+        case null { return false; };
+      };
     };
 
     // ==============================================================================================================================
@@ -254,7 +255,7 @@ shared ({caller = _owner}) actor class W3T(
         case (#Ok(block_height)) {
             return #ok(block_height); // Return the block height if successful
         };
-        case (#Err(err)) {
+        case (#Err(_)) {
             return #err(#withdrawFailed); // Return error message
         };
       };
