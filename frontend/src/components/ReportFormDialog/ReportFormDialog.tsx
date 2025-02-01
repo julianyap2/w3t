@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { useAuth, useCandidActor } from "@bundly/ares-react";
 import { CandidActors } from "@app/canisters";
 import { GREEN_PRIMARY } from "@app/constants/colors";
-
+import { notifications } from "@mantine/notifications";
+import { IconCheck, IconX } from "@tabler/icons-react";
+import { Principal } from '@dfinity/principal';
 
 
 const ReportFormDialog = () => {
@@ -12,7 +14,7 @@ const ReportFormDialog = () => {
     const w3t = useCandidActor<CandidActors>("w3t", currentIdentity, {
         canisterId: process.env.NEXT_PUBLIC_W3T_CANISTER_ID,
     }) as CandidActors["w3t"];
-
+    const [loadingUpload, setLoadingUpload] = useState<boolean>(false)
     const [violationTypeMap, setViolationTypeMap] = useState<Record<string, string>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -31,7 +33,6 @@ const ReportFormDialog = () => {
 
     useEffect(() => {
         loadViolationDescriptions();
-        reportForm.reset();
     }, []);
 
     const loadViolationDescriptions = async () => {
@@ -45,53 +46,32 @@ const ReportFormDialog = () => {
         setViolationTypeMap(violationMap);
     }
 
-    // const getViolationTypeVariantFromDescriptions = async (violation: string) => {
-    //     const violationCodePair =  Object.entries(violationTypeMap)
-    //         .find(([key, value]) => value === violation);
-    //     const violationTypeVariant: Record<string, any> = {};
-    //     if(violationCodePair) {
-    //         const violationCode = violationCodePair[0];
-    //         violationTypeVariant[violationCode] = null;
-    //     }
+    const getViolationTypeVariantFromDescriptions = async (violation: string) => {
+        const violationCodePair =  Object.entries(violationTypeMap)
+            .find(([key, value]) => value === violation);
+        const violationTypeVariant: Record<string, any> = {};
+        if(violationCodePair) {
+            const violationCode = violationCodePair[0];
+            violationTypeVariant[violationCode] = null;
+        }
         
-    //     return violationTypeVariant;
-    // }
-
-    
-  async function fetchVideoChunks(fileId: string) {
-    let chunks = [];
-    let index: bigint = BigInt(0);
-
-    while (true) {
-        const response = await w3t.getVideoChunk(fileId, index);
-        if("err" in response) break;
-        const chunk = "ok" in response? response.ok : undefined;
-        chunks.push(chunk);
-        index++;
+        return violationTypeVariant;
     }
-    console.log(chunks)
-    return chunks;
-  }
-
+    
   const [video, setVideo] = useState<File>();
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
+  const handleVideo = (vids : File) => {
+    if (vids) {
       const reader = new FileReader();
       reader.onload = (e) => {
         console.log("File content:", e.target?.result);
       };
-      reader.readAsText(file); // You can also use readAsArrayBuffer or readAsDataURL
-      setVideo(file);
+      reader.readAsText(vids); // You can also use readAsArrayBuffer or readAsDataURL
+      setVideo(vids);
     }
   };
 
-  const [fileUid, setFileUid] = useState<string>("");
-  const handleTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setFileUid(event.target.value);
-  };
-
-  const uploadFile = async (uid: string) => {
+  const uploadFile = async (uid: any) => {
+    setLoadingUpload(true)
     const CHUNK_SIZE = 200000; // 0.2MB
 
     const reader = new FileReader();
@@ -115,6 +95,7 @@ const ReportFormDialog = () => {
       }
   
       console.log("Video successfully uploaded!");
+      setLoadingUpload(false)
     };
   };
 
@@ -141,34 +122,44 @@ const ReportFormDialog = () => {
 
     const handleSubmit = async (values: typeof reportForm.values) => {
         setIsSubmitting(true);
-        
-        // const report = {
-        //     "status": {
-        //         "OnValidationProcess": null
-        //     },
-        //     "rewardAmount": BigInt(0),
-        //     "rewardPaidAt": BigInt(0),
-        //     "stakeAmount": BigInt(0),
-        //     "submittedAt": null,
-        //     "policeReportNumber": null,
-        //     "licenseNumber": reportForm.values.licenseNumber,
-        //     "validatedAt": null,
-        //     "reporter": null,
-        //     "violationType": await getViolationTypeVariantFromDescriptions(reportForm.values.violationType),
-        //     "police": null,
-        // }
-        console.log("YA");
-        console.log(process.env);
-        // const res = await w3t.submitReport(report);
-        // console.log(report);
-        // const violationCode: keyof Report = await getViolationCodeFromDescription(reportForm.values.violationType);
-        // const report: Report = {
-        //     violationType: {
-        //         violationCode: null
-        //     }
-        // }
-        // console.log(report);
-        setIsSubmitting(false)
+        if(reportForm.values.video){
+            try {
+                handleVideo(reportForm.values.video)
+                let report: any = {
+                    "status": {
+                        "OnValidationProcess": null
+                    },
+                    "rewardAmount": BigInt(0),
+                    "rewardPaidAt": [],
+                    "stakeAmount": BigInt(0),
+                    "submittedAt": [],
+                    "policeReportNumber": [""],
+                    "licenseNumber": reportForm.values.licenseNumber,
+                    "validatedAt": [],
+                    "reporter": Principal.fromText('aaaaa-aa'),
+                    "violationType": await getViolationTypeVariantFromDescriptions(reportForm.values.violationType),
+                    "police": Principal.fromText('aaaaa-aa'),
+                }
+                const res = await w3t.submitReport(report);
+                uploadFile(res)
+                setIsSubmitting(false)
+                reportForm.reset();
+                notifications.show({
+                    title: "Success!",
+                    message: "Report Submitted!",
+                    color: "green",
+                    icon: <IconCheck/>
+                })
+                
+            } catch (error: any) {
+                notifications.show({
+                    title: "Error!",
+                    message: error,
+                    color: "red",
+                    icon: <IconX/>
+                })
+            }
+        }
     }
 
     return (
