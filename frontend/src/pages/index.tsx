@@ -128,7 +128,6 @@ export default function IcConnectPage() {
       }
   
       console.log("Video successfully uploaded!");
-      console.log("Video successfully uploaded!");
     };
   };
 
