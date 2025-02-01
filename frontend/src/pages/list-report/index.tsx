@@ -9,6 +9,7 @@ import type { Report, UidReport } from "../../declarations/w3t/w3t.did";
 import { Principal } from '@dfinity/principal';
 import { modals } from '@mantine/modals';
 import DetailReport from "@app/components/DetailReport/DetailReport";
+import { GREEN_PRIMARY } from "@app/constants/colors";
 
 const listReport = () => {
   const { isAuthenticated, currentIdentity, changeCurrentIdentity } = useAuth();
@@ -29,6 +30,7 @@ const listReport = () => {
       <DetailReport detailDataArray={detailDataArray} />
     ),
     size: 'lg',
+    confirmProps: { color: GREEN_PRIMARY},
     labels: { confirm: 'Approve', cancel: 'Reject' },
     onCancel: () => console.log('Cancel'),
     onConfirm: () => console.log('Confirmed'),
