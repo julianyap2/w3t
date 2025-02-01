@@ -7,6 +7,9 @@ import { CandidActors } from "@app/canisters";
 import { useRouter } from "next/router";
 import type { Report } from "../../declarations/w3t/w3t.did";
 import { Principal } from '@dfinity/principal';
+import { modals } from '@mantine/modals';
+import DetailReport from "@app/components/DetailReport/DetailReport";
+
 const listReport = () => {
   const { isAuthenticated, currentIdentity, changeCurrentIdentity } = useAuth();
   const router = useRouter();
@@ -19,6 +22,17 @@ const listReport = () => {
   useEffect(() => {
     getReports();
   }, [currentIdentity]);
+
+  const openModalDetail = ({detailData} : {detailData : Report}) => modals.openConfirmModal({
+    title: 'Detail Report',
+    children: (
+      <DetailReport detailData={detailData} />
+    ),
+    size: 'lg',
+    labels: { confirm: 'Approve', cancel: 'Reject' },
+    onCancel: () => console.log('Cancel'),
+    onConfirm: () => console.log('Confirmed'),
+  });
 
   async function getReports() {
     try {
@@ -143,11 +157,13 @@ const examplePrincipal2 = Principal.fromText('aaaaa-aa');
     data: mockReports,
     enablePagination: false,
     enableRowActions: true,
-    renderRowActionMenuItems: ({ row }) => (
-      <>
-        <Menu.Item onClick={() => console.info('Detail')}>Detail</Menu.Item>
-      </>
-    ),
+    renderRowActionMenuItems: ({ row } : {row: any}) => {
+      console.log(row.original)
+      return(
+        <>
+          <Menu.Item onClick={() => openModalDetail({detailData: row.original})}>Detail</Menu.Item>
+        </>
+    )},
     // enableBottomToolbar: false
   });
 
