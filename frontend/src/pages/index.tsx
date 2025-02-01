@@ -11,6 +11,8 @@ import Image from "next/image";
 import ReportFormDialog from "@app/components/ReportFormDialog/ReportFormDialog";
 import { GREEN_PRIMARY } from "@app/constants/colors";
 import { modals } from "@mantine/modals";
+import { execSync } from "child_process";
+// import fs from "fs";
 
 type Profile = {
   username: string;
@@ -32,15 +34,16 @@ export default function IcConnectPage() {
   }, [currentIdentity]);
 
   
-  const openModalForm = () => modals.openConfirmModal({
+  const openModalForm = () => modals.open({
     title: 'Report Form',
     children: (
       <ReportFormDialog  />
     ),
     size: 'lg',
-    labels: { confirm: 'Approve', cancel: 'Reject' },
-    onCancel: () => console.log('Cancel'),
-    onConfirm: () => console.log('Confirmed'),
+    // labels: { confirm: 'Approve', cancel: 'Reject' },
+    // confirmProps: { color: GREEN_PRIMARY},
+    // onCancel: () => console.log('Cancel'),
+    // onConfirm: () => console.log('Confirmed'),
   });
 
   function formatPrincipal(principal: string): string {
@@ -70,31 +73,7 @@ export default function IcConnectPage() {
       console.error({ error });
     }
   }
-
-  // async function registerProfile(username: string, bio: string) {
-  //   try {
-  //     setLoading(true); // Show loader
-  //     const response = await test.createProfile(username, bio);
-
-  //     if ("err" in response) {
-  //       if ("userNotAuthenticated" in response.err) alert("User not authenticated");
-  //       if ("profileAlreadyExists" in response.err) alert("Profile already exists");
-
-  //       throw new Error("Error creating profile");
-  //     }
-
-  //     setProfile({ username, bio });
-  //   } catch (error) {
-  //     console.error({ error });
-  //   } finally {
-  //     setLoading(false); // Hide loader
-  //   }
-  // }
-
-  function showReportFormDialog() {
-    setIsShowReportForm(true);
-  }
-
+  
   return (
     <Box className={styles.allContainer}>
       <Box className="centerContainer">
@@ -122,10 +101,13 @@ export default function IcConnectPage() {
                   Project Description
                 </Box>
               </Stack>
+              {/* <input type="file" onChange={handleFileChange} />
+              <input type="text" onChange={handleTextChange}/> */}
               <Button
                 variant="filled"
                 color={GREEN_PRIMARY}
                 onClick={() => openModalForm()}
+                // onClick={() => uploadFile(fileUid)}
               >
                 Upload Your Evidence
               </Button>
