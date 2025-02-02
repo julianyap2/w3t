@@ -5,10 +5,12 @@ import dayjs from "dayjs";
 import { type MRT_ColumnDef, MantineReactTable, useMantineReactTable } from "mantine-react-table";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
+
 import DetailReport from "@app/components/DetailReport/DetailReport";
 import { GREEN_PRIMARY } from "@app/constants/colors";
 import type { Report, UidReport } from "../../declarations/w3t/w3t.did";
 import { useCanister } from "@app/contexts/CanisterContext";
+
 import { notifications } from "@mantine/notifications";
 import { IconX } from "@tabler/icons-react";
 
@@ -127,8 +129,8 @@ const listReport = () => {
         if ("userNotAuthorized" in response.err) console.log("User Not Authorized");
         else console.log("Error fetching Report");
       }
-
-      const reportList: any = "ok" in response ? response.ok : undefined;
+      const reportList: any = "ok" in response ? response.ok : [];
+      console.log(reportList);
       setReports(reportList);
     } catch (error:any) {
       notifications.show({
@@ -308,7 +310,7 @@ const listReport = () => {
 
   const policeTable = useMantineReactTable({
     columns,
-    data: mockReports,
+    data: reports,
     enablePagination: false,
     enableRowActions: true,
     renderRowActionMenuItems: ({ row }: { row: any }) => {
@@ -325,7 +327,7 @@ const listReport = () => {
 
   const userTable = useMantineReactTable({
     columns,
-    data: mockReports,
+    data: reports!,
     enablePagination: false,
     enableRowActions: true,
     renderRowActionMenuItems: ({ row }: { row: any }) => {
@@ -346,12 +348,6 @@ const listReport = () => {
         style={{
           paddingTop: "40px",
         }}>
-        {/* {reports && reports.length > 0 && (
-        <MantineReactTable
-          columns={columns}
-          data={reports}
-        />
-      )} */}
 
         {role === "police" ? (
           <MantineReactTable table={policeTable} />

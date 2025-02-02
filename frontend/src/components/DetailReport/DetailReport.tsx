@@ -1,6 +1,7 @@
 import { Box, Chip, Grid } from "@mantine/core";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
+
 import { useCanister } from "@app/contexts/CanisterContext";
 
 import type { Report, UidReport } from "../../declarations/w3t/w3t.did";
@@ -71,7 +72,7 @@ const DetailReport = ({ detailDataArray }: { detailDataArray: UidReport }) => {
       <Grid>
         <Grid.Col span={{ base: 12, xs: 6 }}>Police Report Number</Grid.Col>
         <Grid.Col span={{ base: 12, xs: 6 }}>
-          {detailData.policeReportNumber.length > 0 ? detailData.policeReportNumber[0] : "-"}
+          {detailData.policeReportNumber?.length > 0 ? detailData.policeReportNumber[0] : "-"}
         </Grid.Col>
         <Grid.Col span={{ base: 12, xs: 6 }}>License Number</Grid.Col>
         <Grid.Col span={{ base: 12, xs: 6 }}>{detailData.licenseNumber}</Grid.Col>
@@ -87,7 +88,7 @@ const DetailReport = ({ detailDataArray }: { detailDataArray: UidReport }) => {
         <Grid.Col span={{ base: 12, xs: 6 }}>{detailData.rewardAmount}</Grid.Col>
         <Grid.Col span={{ base: 12, xs: 6 }}>Reward Paid At</Grid.Col>
         <Grid.Col span={{ base: 12, xs: 6 }}>
-          {detailData.rewardPaidAt.length > 0
+          {detailData.rewardPaidAt?.length > 0
             ? dayjs
                 .unix(detailData.rewardPaidAt[0] != undefined ? Number(detailData.rewardPaidAt[0]) : 0)
                 .format("DD-MM-YYYY HH:mm:ss")
@@ -95,7 +96,7 @@ const DetailReport = ({ detailDataArray }: { detailDataArray: UidReport }) => {
         </Grid.Col>
         <Grid.Col span={{ base: 12, xs: 6 }}>Validated At</Grid.Col>
         <Grid.Col span={{ base: 12, xs: 6 }}>
-          {detailData.validatedAt.length > 0
+          {detailData.validatedAt?.length > 0
             ? dayjs
                 .unix(detailData.validatedAt[0] != undefined ? Number(detailData.validatedAt[0]) : 0)
                 .format("DD-MM-YYYY HH:mm:ss")
@@ -103,7 +104,7 @@ const DetailReport = ({ detailDataArray }: { detailDataArray: UidReport }) => {
         </Grid.Col>
         <Grid.Col span={{ base: 12, xs: 6 }}>Submitted At</Grid.Col>
         <Grid.Col span={{ base: 12, xs: 6 }}>
-          {detailData.submittedAt.length > 0
+          {detailData.submittedAt?.length > 0
             ? dayjs
                 .unix(detailData.submittedAt[0] != undefined ? Number(detailData.submittedAt[0]) : 0)
                 .format("DD-MM-YYYY HH:mm:ss")

@@ -5,7 +5,7 @@ import { GREEN_PRIMARY } from "@app/constants/colors";
 import { notifications } from "@mantine/notifications";
 import { IconCheck, IconX } from "@tabler/icons-react";
 import { Principal } from '@dfinity/principal';
-import { ViolationType } from "@app/declarations/w3t/w3t.did";
+import { ViolationType, Report } from "@app/declarations/w3t/w3t.did";
 import { useCanister } from "@app/contexts/CanisterContext";
 
 interface ReportFormDialogProps {
@@ -52,17 +52,24 @@ const ReportFormDialog = () => {
       reader.onload = (e) => {
         console.log("File content:", e.target?.result);
       };
-      reader.readAsText(vids); // You can also use readAsArrayBuffer or readAsDataURL
+      console.log(`Typeof: ${typeof vids}`);
+      console.log(`Video: ${vids}`)
       setVideo(vids);
+    } else {
+        console.log("Video is empty");
     }
   };
 
   const uploadFile = async (uid: any) => {
     setLoadingUpload(true)
     const CHUNK_SIZE = 200000; // 0.2MB
-
+    
     const reader = new FileReader();
-    reader.readAsArrayBuffer(video!);
+    video?.arrayBuffer().then((arrayBuffer) => {
+        const blob = new Blob([new Uint8Array(arrayBuffer)], {type: video.type });
+        reader.readAsArrayBuffer(blob);
+        console.log(`Successfully read: ${blob}`);
+    });
     reader.onload = async () => {
       const fileBytes = new Uint8Array(reader.result as ArrayBuffer);
       const fileSize: number = fileBytes.length;
@@ -108,8 +115,8 @@ const ReportFormDialog = () => {
         if(reportForm.values.video){
             try {
                 handleVideo(reportForm.values.video)
-                const violationTypeIndex = violationTypeArray?.find((x) => reportForm.values.violationType == x.briefDescription);
-                let report: any = {
+                const violationTypeIndex = violationTypeArray?.find((x) => reportForm.values.violationType == x.briefDescription)!;
+                let report: Report = {
                     "status": {
                         "OnValidationProcess": null
                     },
@@ -120,14 +127,14 @@ const ReportFormDialog = () => {
                     "policeReportNumber": [""],
                     "licenseNumber": reportForm.values.licenseNumber,
                     "validatedAt": [],
-                    "reporter": principalId,
+                    "reporter": Principal.fromText(principalId),
                     "violationType": violationTypeIndex,
-                    "police": null,
+                    "police": [],
                 }
                 const res = await w3tActor.submitReport(report);
                 const response: string = "ok" in res ? res.ok : "";
-                uploadFile(response)
-                setIsSubmitting(false)
+                await uploadFile(response)
+                
                 reportForm.reset();
                 notifications.show({
                     title: "Success!",
@@ -144,6 +151,7 @@ const ReportFormDialog = () => {
                     icon: <IconX/>
                 })
             }
+            setIsSubmitting(false)
         }
     }
 

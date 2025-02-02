@@ -240,7 +240,7 @@ shared ({caller = _owner}) actor class W3T(
     type GetVideoChunkResponse = Result.Result<Blob, GeneralError>;
     public query ({caller}) func getVideoChunk(uid: Text, index: Nat) : async GetVideoChunkResponse {
       if (Principal.isAnonymous(caller)) return #err(#userNotAuthorized);
-      if (findUidBasedOnCaller(uid, caller) == false) { return #err(#keyNotFound); };
+      if ((findUidBasedOnCaller(uid, caller) == false) and (getRole(caller) != #User) ) { return #err(#keyNotFound); };
 
       switch (Map.get(videosReportMap, Map.thash, uid)) {
         case (?_chunks) { 
