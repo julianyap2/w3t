@@ -1,5 +1,6 @@
 .allContainer{
-    background: linear-gradient(90deg, #121E0E 0%, #173323 55%, #051F29 100%);
+    background-image: url("./../public/bg.webp");
+    
     height: 100vh;
 }
 

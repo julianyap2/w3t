@@ -1,6 +1,6 @@
 import { Identity } from "@dfinity/agent";
 import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
-import styles from "../../../styles/index.module.css";
+import styles from "../../styles/index.module.css";
 import { LogoutButton, useAuth, useCandidActor, useIdentities } from "@bundly/ares-react";
 
 import { CandidActors } from "@app/canisters";
@@ -13,6 +13,8 @@ import { GREEN_PRIMARY } from "@app/constants/colors";
 import { modals } from "@mantine/modals";
 import { execSync } from "child_process";
 import { useCanister } from "@app/contexts/CanisterContext";
+import { notifications } from "@mantine/notifications";
+import { IconBrandChrome } from "@tabler/icons-react";
 // import fs from "fs";
 
 type Profile = {
@@ -28,6 +30,64 @@ export default function IcConnectPage() {
   const [isShowReportForm, setIsShowReportForm] = useState(false);
 
   const { w3tActor, requestConnect } = useCanister();
+
+  const DetectBrowser = () => {
+    const userAgent = navigator.userAgent.toLowerCase();
+    if (
+      userAgent.indexOf("chrome") > -1 &&
+      userAgent.indexOf("edge") === -1 &&
+      userAgent.indexOf("safari") > -1
+    ) {
+      return "chrome";
+    } else if (userAgent.indexOf("firefox") > -1) {
+      return "firefox";
+    } else if (userAgent.indexOf("edge") > -1) {
+      return "edge";
+    } else if (userAgent.indexOf("safari") > -1) {
+      return "safari";
+    } else {
+      return "other";
+    }
+  }
+
+  const checkConnect = async () => {
+    const browser = DetectBrowser();
+
+    switch (browser) {
+      case "chrome":
+      case "edge":
+        // Chrome and Edge extension check
+        try {
+          requestConnect();
+        } catch (error) {
+          console.log("Failed to connect to canister:", error);
+        }
+        break;
+
+      case "firefox":
+        // Firefox extension check
+        notifications.show({
+          title: "Extension Not Available!",
+          message: "Please Use Either Edge or Chrome!",
+          color: "transparent",
+          icon: <IconBrandChrome />,
+        });
+        break;
+
+      case "safari":
+        // Safari extension check
+        notifications.show({
+          title: "Extension Not Available!",
+          message: "Please Use Either Edge or Chrome!",
+          color: "transparent",
+          icon: <IconBrandChrome />,
+        });
+        break;
+
+      default:
+        console.log("Unsupported browser or extension cannot be detected");
+    }
+  };
 
   const openModalForm = () => modals.open({
     title: 'Report Form',
@@ -48,7 +108,7 @@ export default function IcConnectPage() {
     labels: { confirm: 'Connect', cancel: 'Cancel' },
     confirmProps: { fullWidth: true, color: GREEN_PRIMARY },
     cancelProps: { display: "none" },
-    onConfirm: async () => requestConnect,
+    onConfirm: async () => checkConnect,
     centered: true,
   })
 

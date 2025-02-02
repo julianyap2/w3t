@@ -39,7 +39,6 @@ import {
 } from "@tabler/icons-react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-
 import { InternetIdentityButton } from "@bundly/ares-react";
 
 import { GREEN_PRIMARY } from "@app/constants/colors";
@@ -103,8 +102,7 @@ export function HeaderMegaMenu({ client }: { client: any }) {
       </Group>
     </UnstyledButton>
   ));
-
-  function detectBrowser() {
+  const DetectBrowser = () => {
     const userAgent = navigator.userAgent.toLowerCase();
     if (
       userAgent.indexOf("chrome") > -1 &&
@@ -123,8 +121,8 @@ export function HeaderMegaMenu({ client }: { client: any }) {
     }
   }
 
-  const handleClick = async () => {
-    const browser = detectBrowser();
+  const checkConnect = async () => {
+    const browser = DetectBrowser();
 
     switch (browser) {
       case "chrome":
@@ -199,7 +197,7 @@ export function HeaderMegaMenu({ client }: { client: any }) {
       labels: { confirm: "Connect", cancel: "Cancel" },
       confirmProps: { fullWidth: true, color: GREEN_PRIMARY },
       cancelProps: { display: "none" },
-      onConfirm: async () => requestConnect,
+      onConfirm: async () => checkConnect,
       centered: true,
     });
 
@@ -231,7 +229,7 @@ export function HeaderMegaMenu({ client }: { client: any }) {
               Report List
             </Text>
             {principalId === "" ? (
-              <Button onClick={handleClick} className={classes.buttonConnect} w={200}>
+              <Button onClick={checkConnect} className={classes.buttonConnect} w={200}>
                 Connect
               </Button>
             ) : (
