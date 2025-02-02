@@ -10,9 +10,11 @@ import {
   Drawer,
   Group,
   HoverCard,
+  Menu,
   Popover,
   ScrollArea,
   SimpleGrid,
+  Stack,
   Text,
   ThemeIcon,
   UnstyledButton,
@@ -29,7 +31,9 @@ import {
   IconChevronDown,
   IconCode,
   IconCoin,
+  IconCoins,
   IconFingerprint,
+  IconLogout2,
   IconNotification,
 } from "@tabler/icons-react";
 import { useRouter } from "next/router";
@@ -77,6 +81,7 @@ const mockdata = [
 
 export function HeaderMegaMenu({ client }: { client: any }) {
   const { requestConnect, principalId, w3tActor } = useCanister();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const [opened, { close, open }] = useDisclosure(false);
   const theme = useMantineTheme();
@@ -208,32 +213,55 @@ export function HeaderMegaMenu({ client }: { client: any }) {
             >
               Connect
             </Button> :
-            <Popover width={300} trapFocus position="bottom" withArrow shadow="md">
-              <Popover.Target>
-                <Button
-                  className={classes.buttonConnect} 
-                  onMouseEnter={open} 
-                  onMouseLeave={close}
-                  w={200}
-                >
-                  {principalId.slice(0, 5)}...{principalId.slice(-5)}
-                </Button>
-              </Popover.Target>
-              <Popover.Dropdown>
-                <Group gap={6}>
-                  <Avatar 
-                    src={"/placeholder.webp"}
-                    alt="w3t-icon"
-                    radius={"xl"}
-                    size={25}
-                  />
-                  <Text fw={500} size="sm" lh={1} mr={3}>
-                     000 
-                  </Text>
-                </Group>
-              </Popover.Dropdown>
-            </Popover>
 
+            <Menu
+            width={260}
+            position="bottom-end"
+            transitionProps={{ transition: 'pop-top-right' }}
+            onClose={() => setMenuOpen(false)}
+            onOpen={() => setMenuOpen(true)}
+            withinPortal
+            trigger="click-hover"
+          >
+            <Menu.Target>
+              <Button
+                  className={classes.buttonConnect} 
+                  w={200}
+              >
+                {principalId.slice(0, 5)}...{principalId.slice(-5)}
+              </Button>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Item>
+                <Stack
+                  align="stretch"
+                  justify="center"
+                  gap="md"
+                  h={100}
+                >
+                  <Text ta={"center"}>My W3T</Text>
+                  <Group gap={6} justify="center">
+                    <Text fw={500} fz={"2rem"} lh={1} mr={3}>
+                      000 
+                    </Text>
+                    <Avatar 
+                      src={"/placeholder.webp"}
+                      alt="w3t-icon"
+                      radius={"xl"}
+                      size={40}
+                    />
+                  </Group>
+                </Stack>
+              </Menu.Item>
+              <Menu.Divider />
+              <Menu.Item leftSection={<IconCoins size={16} stroke={1.5} />}>
+                Deposit
+              </Menu.Item>
+              <Menu.Item leftSection={<IconLogout2 size={16} stroke={1.5} />}>
+                Disconnect
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
             }
             
           </Group>
