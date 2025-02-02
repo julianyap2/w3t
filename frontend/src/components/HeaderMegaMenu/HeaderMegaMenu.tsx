@@ -32,6 +32,8 @@ import {
 import { InternetIdentityButton } from '@bundly/ares-react';
 import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import { useCanister } from '@app/contexts/CanisterContext';
   
   const mockdata = [
     {
@@ -67,6 +69,8 @@ import { useRouter } from 'next/router';
   ];
   
   export function HeaderMegaMenu({ client } : {client: any}) {
+    const { requestConnect, principalId } = useCanister();
+    
     const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
     const [linksOpened, { toggle: toggleLinks }] = useDisclosure(false);
     const theme = useMantineTheme();
@@ -103,10 +107,7 @@ import { useRouter } from 'next/router';
         return 'other';
       }
     }
-    function onLogin() {
-      const provider = client.getProvider("internet-identity");
-      provider.connect();
-    }
+
     const handleClick = async() => {
       const browser = detectBrowser();
       
@@ -115,27 +116,9 @@ import { useRouter } from 'next/router';
         case 'edge':
           // Chrome and Edge extension check
           try {
-            // router.reload();
-            if(typeof window.ic !== "undefined" && window.ic.infinityWallet){
-              if(await window.ic.infinityWallet.isConnected()){
-                console.log("test")
-                const provider = client.getProvider("internet-identity");
-                provider.connect();
-              }else{
-                await window.ic.infinityWallet.requestConnect();
-              }
-            }else{
-              window.open("https://chromewebstore.google.com/detail/bitfinity-wallet/jnldfbidonfeldmalbflbmlebbipcnle", "_blank")
-            }
-            // await chrome.runtime.sendMessage('jnldfbidonfeldmalbflbmlebbipcnle', { type: 'checkExtension' }, (response) => {
-            //   if (response && response.exists) {
-            //     console.log(`${browser} extension is installed`);
-            //   } else {
-            //     console.log(`${browser} extension is not installed1`);
-            //   }
-            // });
+            requestConnect();
           } catch (error) {
-            console.log(`${browser} extension is not installed`);
+            console.log("Failed to connect to canister:", error);
           }
           break;
     
@@ -239,7 +222,7 @@ import { useRouter } from 'next/router';
                 className={classes.buttonConnect}
                 w={200}
               >
-                Connect
+                {principalId !== "" ? `${principalId.slice(0, 5)}...${principalId.slice(-5)}` : "Connect" }
               </Button>
             </Group>
   

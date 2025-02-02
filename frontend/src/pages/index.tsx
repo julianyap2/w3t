@@ -12,6 +12,7 @@ import ReportFormDialog from "@app/components/ReportFormDialog/ReportFormDialog"
 import { GREEN_PRIMARY } from "@app/constants/colors";
 import { modals } from "@mantine/modals";
 import { execSync } from "child_process";
+import { useCanister } from "@app/contexts/CanisterContext";
 // import fs from "fs";
 
 type Profile = {
@@ -25,19 +26,13 @@ export default function IcConnectPage() {
   const [profile, setProfile] = useState<Profile | undefined>();
   const [loading, setLoading] = useState(false); // State for loader
   const [isShowReportForm, setIsShowReportForm] = useState(false);
-  const w3t = useCandidActor<CandidActors>("w3t", currentIdentity, {
-    canisterId: process.env.NEXT_PUBLIC_W3T_CANISTER_ID,
-  }) as CandidActors["w3t"];
 
-  useEffect(() => {
-    getProfile();
-  }, [currentIdentity]);
+  const { w3tActor } = useCanister();
 
-  
   const openModalForm = () => modals.open({
     title: 'Report Form',
     children: (
-      <ReportFormDialog  />
+      <ReportFormDialog  w3tActor={w3tActor}/>
     ),
     size: 'lg',
     // labels: { confirm: 'Approve', cancel: 'Reject' },
@@ -55,23 +50,6 @@ export default function IcConnectPage() {
 
   function disableIdentityButton(identityButton: Identity): boolean {
     return currentIdentity.getPrincipal().toString() === identityButton.getPrincipal().toString();
-  }
-
-  async function getProfile() {
-    try {
-      const response = await w3t.getAllReports();
-
-      if ("err" in response) {
-        if ("userNotAuthorized" in response.err) console.log("User not authorized");
-        else console.log("Error fetching profile");
-      }
-
-      const profile = "ok" in response ? response.ok : undefined;
-      console.log(profile)
-      // setProfile(profile);
-    } catch (error) {
-      console.error({ error });
-    }
   }
   
   return (

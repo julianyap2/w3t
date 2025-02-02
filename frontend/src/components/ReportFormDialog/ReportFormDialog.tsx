@@ -1,20 +1,17 @@
-import { Box, Button, FileInput, Modal, Select, TextInput } from "@mantine/core";
+import { Box, Button, FileInput, Select, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useEffect, useState } from "react";
-import { useAuth, useCandidActor } from "@bundly/ares-react";
-import { CandidActors } from "@app/canisters";
 import { GREEN_PRIMARY } from "@app/constants/colors";
 import { notifications } from "@mantine/notifications";
 import { IconCheck, IconX } from "@tabler/icons-react";
 import { Principal } from '@dfinity/principal';
 
+interface ReportFormDialogProps {
+    w3tActor: any;
+}
 
-const ReportFormDialog = () => {
-    const { isAuthenticated, currentIdentity, changeCurrentIdentity } = useAuth();
-    const w3t = useCandidActor<CandidActors>("w3t", currentIdentity, {
-        canisterId: process.env.NEXT_PUBLIC_W3T_CANISTER_ID,
-    }) as CandidActors["w3t"];
-    const [loadingUpload, setLoadingUpload] = useState<boolean>(false)
+const ReportFormDialog = ({w3tActor} : ReportFormDialogProps) => {    
+    const [loadingUpload, setLoadingUpload] = useState<boolean>(false);
     const [violationTypeMap, setViolationTypeMap] = useState<Record<string, string>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -36,7 +33,7 @@ const ReportFormDialog = () => {
     }, []);
 
     const loadViolationDescriptions = async () => {
-        const res = await w3t.getViolationDescriptions();
+        const res = await w3tActor.getViolationDescriptions();
         const violationPairs = "ok" in res ? res.ok : [];
 
         const violationMap: Record<string, string> = {};
@@ -88,7 +85,7 @@ const ReportFormDialog = () => {
         
         console.log(`Uploading chunk ${i + 1}/${totalChunks}...`);
         
-        const response = await w3t.uploadVideoByChunk(uid, chunk);
+        const response = await w3tActor.uploadVideoByChunk(uid, chunk);
         if("err" in response) break;
         const success = "ok" in response? response.ok : undefined;
         console.log(`Success upload chunk: ${i}, ${success}`)
@@ -116,10 +113,6 @@ const ReportFormDialog = () => {
   //   return videoURL;
   // }
 
-  
-  // MARK -- DELETE LATER
-//   fetchVideoChunks("A");
-
     const handleSubmit = async (values: typeof reportForm.values) => {
         setIsSubmitting(true);
         if(reportForm.values.video){
@@ -140,7 +133,7 @@ const ReportFormDialog = () => {
                     "violationType": await getViolationTypeVariantFromDescriptions(reportForm.values.violationType),
                     "police": Principal.fromText('aaaaa-aa'),
                 }
-                const res = await w3t.submitReport(report);
+                const res = await w3tActor.submitReport(report);
                 uploadFile(res)
                 setIsSubmitting(false)
                 reportForm.reset();
