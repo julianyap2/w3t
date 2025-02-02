@@ -45,13 +45,7 @@ const DetailReport = ({ detailDataArray }: { detailDataArray: UidReport }) => {
   };
 
   const violationTypeChecker = () => {
-    if ("LLAJ222009_283" in detailData.violationType) {
-      return <Box color="green">LLAJ222009_283</Box>;
-    } else if ("LLAJ222009_287" in detailData.violationType) {
-      return <Box color="orange">LLAJ222009_287</Box>;
-    } else {
-      return <Box color="gray">LLAJ222009_291</Box>;
-    }
+    return <Box>{detailData.violationType.briefDescription}</Box>;
   };
 
   const testBlob: Uint8Array = new Uint8Array(BinaryJul);

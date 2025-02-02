@@ -5,6 +5,7 @@ import { GREEN_PRIMARY } from "@app/constants/colors";
 import { notifications } from "@mantine/notifications";
 import { IconCheck, IconX } from "@tabler/icons-react";
 import { Principal } from '@dfinity/principal';
+import { ViolationType } from "@app/declarations/w3t/w3t.did";
 
 interface ReportFormDialogProps {
     w3tActor: any;
@@ -12,7 +13,8 @@ interface ReportFormDialogProps {
 
 const ReportFormDialog = ({w3tActor} : ReportFormDialogProps) => {    
     const [loadingUpload, setLoadingUpload] = useState<boolean>(false);
-    const [violationTypeMap, setViolationTypeMap] = useState<Record<string, string>>({});
+    const [violationTypeStringArray, setViolationTypeStringArray] = useState<string[]>();
+    const [violationTypeArray, setViolationTypeArray] = useState<ViolationType[]>();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const reportForm = useForm({
@@ -34,25 +36,10 @@ const ReportFormDialog = ({w3tActor} : ReportFormDialogProps) => {
 
     const loadViolationDescriptions = async () => {
         const res = await w3tActor.getViolationDescriptions();
-        const violationPairs = "ok" in res ? res.ok : [];
-
-        const violationMap: Record<string, string> = {};
-        for (let violationPair of violationPairs) {
-            violationMap[violationPair[0]] = violationPair[1];
-        }
-        setViolationTypeMap(violationMap);
-    }
-
-    const getViolationTypeVariantFromDescriptions = async (violation: string) => {
-        const violationCodePair =  Object.entries(violationTypeMap)
-            .find(([key, value]) => value === violation);
-        const violationTypeVariant: Record<string, any> = {};
-        if(violationCodePair) {
-            const violationCode = violationCodePair[0];
-            violationTypeVariant[violationCode] = null;
-        }
-        
-        return violationTypeVariant;
+        const violations: ViolationType[] = "ok" in res ? res.ok : [];
+        let violationDesc: string[] = violations.map((violation: ViolationType) => violation.briefDescription)
+        setViolationTypeStringArray(violationDesc);
+        setViolationTypeArray(violations);
     }
     
   const [video, setVideo] = useState<File>();
@@ -130,8 +117,8 @@ const ReportFormDialog = ({w3tActor} : ReportFormDialogProps) => {
                     "licenseNumber": reportForm.values.licenseNumber,
                     "validatedAt": [],
                     "reporter": Principal.fromText('aaaaa-aa'),
-                    "violationType": await getViolationTypeVariantFromDescriptions(reportForm.values.violationType),
-                    "police": Principal.fromText('aaaaa-aa'),
+                    "violationType": violationTypeArray?.indexOf((x) => {reportForm.values.violationType == x.briefDescription}),
+                    "police":  null,
                 }
                 const res = await w3tActor.submitReport(report);
                 uploadFile(res)
@@ -166,7 +153,7 @@ const ReportFormDialog = ({w3tActor} : ReportFormDialogProps) => {
                 <Select
                     label="Violation Type"
                     placeholder="Select violation"
-                    data={Object.values(violationTypeMap)}
+                    data={violationTypeStringArray}
                     {...reportForm.getInputProps("violationType")}
                 />
                 <FileInput
