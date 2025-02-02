@@ -9,6 +9,7 @@ import type { Report, UidReport } from "../../declarations/w3t/w3t.did";
 import { Principal } from '@dfinity/principal';
 import { modals } from '@mantine/modals';
 import DetailReport from "@app/components/DetailReport/DetailReport";
+import { GREEN_PRIMARY } from "@app/constants/colors";
 
 const listReport = () => {
   const { isAuthenticated, currentIdentity, changeCurrentIdentity } = useAuth();
@@ -23,15 +24,25 @@ const listReport = () => {
     getReports();
   }, [currentIdentity]);
 
-  const openModalDetail = ({detailDataArray} : {detailDataArray : UidReport}) => modals.openConfirmModal({
+  const openModalDetailPolice = ({detailDataArray} : {detailDataArray : UidReport}) => modals.openConfirmModal({
     title: 'Detail Report',
     children: (
       <DetailReport detailDataArray={detailDataArray} />
     ),
     size: 'lg',
+    confirmProps: { color: GREEN_PRIMARY},
     labels: { confirm: 'Approve', cancel: 'Reject' },
     onCancel: () => console.log('Cancel'),
     onConfirm: () => console.log('Confirmed'),
+  });
+
+  
+  const openModalDetailUser = ({detailDataArray} : {detailDataArray : UidReport}) => modals.open({
+    title: 'Detail Report',
+    children: (
+      <DetailReport detailDataArray={detailDataArray} />
+    ),
+    size: 'lg',
   });
 
   async function getReports() {
@@ -188,7 +199,7 @@ const examplePrincipal2 = Principal.fromText('aaaaa-aa');
       console.log(row.original)
       return(
         <>
-          <Menu.Item onClick={() => openModalDetail({detailDataArray: row.original})}>Detail</Menu.Item>
+          <Menu.Item onClick={() => openModalDetailPolice({detailDataArray: row.original})}>Detail</Menu.Item>
         </>
     )},
     // enableBottomToolbar: false
@@ -199,6 +210,14 @@ const examplePrincipal2 = Principal.fromText('aaaaa-aa');
     columns,
     data: mockReports,
     enablePagination: false,
+    enableRowActions: true,
+    renderRowActionMenuItems: ({ row } : {row: any}) => {
+      console.log(row.original)
+      return(
+        <>
+          <Menu.Item onClick={() => openModalDetailUser({detailDataArray: row.original})}>Detail</Menu.Item>
+        </>
+    )},
     // enableBottomToolbar: false
   });
 
