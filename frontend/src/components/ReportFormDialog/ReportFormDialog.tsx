@@ -125,7 +125,8 @@ const ReportFormDialog = () => {
                     "police": null,
                 }
                 const res = await w3tActor.submitReport(report);
-                uploadFile(res)
+                const response: string = "ok" in res ? res.ok : "";
+                uploadFile(response)
                 setIsSubmitting(false)
                 reportForm.reset();
                 notifications.show({

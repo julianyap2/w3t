@@ -125,6 +125,7 @@ export default function IcConnectPage() {
   
   return (
     <Box className={styles.allContainer}>
+      <Box className={"bg"}></Box>
       <Box className="centerContainer">
         <Grid
           style={{
