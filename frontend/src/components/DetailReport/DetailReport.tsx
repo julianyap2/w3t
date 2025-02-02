@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { useCanister } from "@app/contexts/CanisterContext";
 
 import type { Report, UidReport } from "../../declarations/w3t/w3t.did";
-import BinaryJul from "./test.js";
 
 const DetailReport = ({ detailDataArray }: { detailDataArray: UidReport }) => {
   const { w3tActor, principalId } = useCanister();

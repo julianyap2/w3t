@@ -28,6 +28,7 @@ import {
   IconBook,
   IconBrandChrome,
   IconBrandEdge,
+  IconCashBanknote,
   IconChartPie3,
   IconChevronDown,
   IconCode,
@@ -36,6 +37,7 @@ import {
   IconFingerprint,
   IconLogout2,
   IconNotification,
+  IconX,
 } from "@tabler/icons-react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -84,6 +86,7 @@ export function HeaderMegaMenu() {
   const { requestConnect, principalId, w3tActor } = useCanister();
   const [menuOpen, setMenuOpen] = useState(false);
   const [amount, setAmount] = useState<string | number>(0);
+  const [balance, setBalance] = useState<BigInt>(BigInt(0));
   const theme = useMantineTheme();
   const router = useRouter();
   const links = mockdata.map((item) => (
@@ -210,6 +213,34 @@ export function HeaderMegaMenu() {
     }
   };
 
+  const fetchBalance = async() => {
+    try {
+      const response = await w3tActor.getMyBalance();
+      if ("err" in response) {
+        if ("userNotAuthorized" in response.err) console.log("User Not Authorized");
+        else console.log("Error fetching Report");
+      }
+
+      const balances: any = "ok" in response ? response.ok : undefined;
+      setBalance(balances)
+    } catch (error: any) {
+      notifications.show({
+        title: "Error!",
+        message: error,
+        color: "red",
+        icon: <IconX />
+      })
+      
+    }
+  }
+
+  useEffect(() => {
+    if(w3tActor){
+      fetchBalance()
+    }
+  }, [])
+  
+
   return (
     <Box
       style={{
@@ -226,7 +257,7 @@ export function HeaderMegaMenu() {
           }}
         >
           {/* <MantineLogo size={30} /> */}
-          <Image src={"/logo.png"} width={128} height={40} alt="logoW3T"/>
+          <Image src={"/logo.png"} width={128} height={40} alt="logoW3T" onClick={() => router.push('/')}/>
           <Group h="100%" gap={0} visibleFrom="sm"></Group>
           <Group>
             <Text
@@ -234,6 +265,7 @@ export function HeaderMegaMenu() {
               style={{
                 cursor: "pointer",
               }}
+              className={classes.reportList}
               mr={20}
             >
               Report List
@@ -252,7 +284,7 @@ export function HeaderMegaMenu() {
                 withinPortal
                 trigger="click-hover">
                 <Menu.Target>
-                  <Button className={classes.buttonConnect} w={200}>
+                  <Button color={GREEN_PRIMARY} w={200}>
                     {principalId.slice(0, 5)}...{principalId.slice(-5)}
                   </Button>
                 </Menu.Target>
@@ -262,7 +294,7 @@ export function HeaderMegaMenu() {
                       <Text ta={"center"}>My W3T</Text>
                       <Group gap={6} justify="center">
                         <Text fw={500} fz={"2rem"} lh={1} mr={13}>
-                          000
+                          {balance != BigInt(0) ? Number(balance) : 0}
                         </Text>
                         <Avatar src={"/token.png"} alt="w3t-icon" radius={"xl"} size={40} />
                       </Group>
@@ -273,6 +305,7 @@ export function HeaderMegaMenu() {
                     leftSection={<IconCoins size={16} stroke={1.5} />}
                     onClick={openModalDeposit}
                   >Deposit</Menu.Item>
+                  <Menu.Item leftSection={<IconCashBanknote size={16} stroke={1.5} />}>Withdraw</Menu.Item>
                   <Menu.Item leftSection={<IconLogout2 size={16} stroke={1.5} />}>Disconnect</Menu.Item>
                 </Menu.Dropdown>
               </Menu>
