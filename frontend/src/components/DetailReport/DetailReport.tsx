@@ -1,8 +1,6 @@
 import { Box, Chip, Grid } from "@mantine/core";
 import dayjs from "dayjs";
 
-import { useAuth, useCandidActor } from "@bundly/ares-react";
-
 import { CandidActors } from "@app/canisters";
 
 import type { Report, UidReport } from "../../declarations/w3t/w3t.did";

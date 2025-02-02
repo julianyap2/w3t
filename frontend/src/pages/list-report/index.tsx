@@ -6,26 +6,21 @@ import { type MRT_ColumnDef, MantineReactTable, useMantineReactTable } from "man
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 
-import { LogoutButton, useAuth, useCandidActor, useIdentities } from "@bundly/ares-react";
-
-import { CandidActors } from "@app/canisters";
 import DetailReport from "@app/components/DetailReport/DetailReport";
 import { GREEN_PRIMARY } from "@app/constants/colors";
 
 import type { Report, UidReport } from "../../declarations/w3t/w3t.did";
+import { useCanister } from "@app/contexts/CanisterContext";
 
 const listReport = () => {
-  const { isAuthenticated, currentIdentity, changeCurrentIdentity } = useAuth();
   const router = useRouter();
   const [role, setRole] = useState<string>("police");
   const [reports, setReports] = useState<Report[] | undefined>(undefined);
-  const w3t = useCandidActor<CandidActors>("w3t", currentIdentity, {
-    canisterId: process.env.NEXT_PUBLIC_TEST_CANISTER_ID,
-  }) as CandidActors["w3t"];
+  const {w3tActor} = useCanister()
 
   useEffect(() => {
     getReports();
-  }, [currentIdentity]);
+  }, []);
 
   const openModalDetailPolice = ({ detailDataArray }: { detailDataArray: UidReport }) =>
     modals.openConfirmModal({
@@ -47,8 +42,7 @@ const listReport = () => {
 
   async function getReports() {
     try {
-      const response = await w3t.getAllReports();
-      console.log(currentIdentity);
+      const response = await w3tActor.getAllReports();
       if ("err" in response) {
         if ("userNotAuthorized" in response.err) console.log("User Not Authorized");
         else console.log("Error fetching Report");
