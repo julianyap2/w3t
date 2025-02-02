@@ -1,16 +1,18 @@
 import { Box, Chip, Grid } from "@mantine/core";
 import dayjs from "dayjs";
+import { useEffect, useState } from "react";
 
 import { useAuth, useCandidActor } from "@bundly/ares-react";
 
 import { CandidActors } from "@app/canisters";
+import { useCanister } from "@app/contexts/CanisterContext";
 
 import type { Report, UidReport } from "../../declarations/w3t/w3t.did";
 import BinaryJul from "./test.js";
-import { useCanister } from "@app/contexts/CanisterContext";
 
 const DetailReport = ({ detailDataArray }: { detailDataArray: UidReport }) => {
   const { w3tActor, principalId } = useCanister();
+  const [videoURL, setVideoURL] = useState<any>();
 
   let detailData: Report = detailDataArray[1];
 
@@ -46,12 +48,7 @@ const DetailReport = ({ detailDataArray }: { detailDataArray: UidReport }) => {
     return <Box>{detailData.violationType.briefDescription}</Box>;
   };
 
-  
-
-  const testBlob: Uint8Array = new Uint8Array(BinaryJul);
-  const videoBlob = new Blob([testBlob], { type: "video/mp4" });
-  const videoURL = URL.createObjectURL(videoBlob);
-  async function fetchVideoChunks(fileId: string) {
+  const fetchVideoChunks = async (fileId: string) => {
     let chunks = [];
     let index: bigint = BigInt(0);
 
@@ -64,7 +61,15 @@ const DetailReport = ({ detailDataArray }: { detailDataArray: UidReport }) => {
     }
     console.log(chunks);
     return chunks;
-  }
+  };
+
+  useEffect(() => {
+    let binaryTemp: any = fetchVideoChunks(detailDataArray[0]);
+
+    const testBlob: Uint8Array = new Uint8Array(binaryTemp);
+    const videoBlob = new Blob([testBlob], { type: "video/mp4" });
+    setVideoURL(URL.createObjectURL(videoBlob));
+  }, []);
 
   return (
     <Box>
@@ -111,14 +116,16 @@ const DetailReport = ({ detailDataArray }: { detailDataArray: UidReport }) => {
         </Grid.Col>
         <Grid.Col span={{ base: 12, xs: 6 }}>UUID</Grid.Col>
         <Grid.Col span={{ base: 12, xs: 6 }}>{detailDataArray[0]}</Grid.Col>
-        <video
-          width="320"
-          height="240"
-          controls
-          src={videoURL}
-          style={{
-            width: "100%",
-          }}></video>
+        {videoURL && (
+          <video
+            width="320"
+            height="240"
+            controls
+            src={videoURL}
+            style={{
+              width: "100%",
+            }}></video>
+        )}
       </Grid>
     </Box>
   );
