@@ -1,12 +1,10 @@
 import { Box } from "@mantine/core"
 import { HeaderMegaMenu } from "../HeaderMegaMenu/HeaderMegaMenu"
 
-
-const Layout = ({children, client} : {children : any, client: any}) => {
-
+const Layout = ({children} : {children : any}) => {
     return(
         <Box>
-            <HeaderMegaMenu client={client}/>
+            <HeaderMegaMenu/>
             {children}
         </Box>
     )
