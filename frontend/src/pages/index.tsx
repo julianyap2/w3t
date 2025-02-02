@@ -100,7 +100,7 @@ export default function HomePage() {
       <Box className="centerContainer">
         <Grid
           style={{
-            paddingTop:"40px"
+            paddingTop:"100px"
           }}
         >
           <Grid.Col span={{ base: 12, md: 6, lg: 6 }}>
@@ -140,26 +140,30 @@ export default function HomePage() {
           <Grid.Col span={{ base: 12, md: 6, lg: 6 }}>
             <Box className={styles.imageContainer}>
               <Image 
-                src={"/placeholder.webp"}
-                width={400}
-                alt="W"
-                height={200}
+                src={"/home1.webp"}
+                width={300}
+                alt="home1"
+                style={{
+                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2),0 6px 20px rgba(0, 0, 0, 0.19)",
+                  borderRadius: "10px"
+                }}
+                height={300}
               />
             </Box>
           </Grid.Col>
         </Grid>
         <Grid
           style={{
-            marginTop:"40px"
+            marginTop:"100px"
           }}
         >
             <Grid.Col span={{ base: 12, md: 6, lg: 6 }}>
               <Box className={styles.imageContainer}>
                 <Image 
-                  src={"/placeholder.webp"}
-                  width={400}
+                  src={"/home2.webp"}
+                  width={300}
                   alt="W"
-                  height={200}
+                  height={337}
                 />
               </Box>
             </Grid.Col>

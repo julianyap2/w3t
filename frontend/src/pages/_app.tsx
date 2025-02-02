@@ -25,6 +25,9 @@ export default function MyApp({ Component, pageProps }: AppProps) {
               content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no"
             />
             <link rel="shortcut icon" href="/favicon.svg" />
+            <link rel="preconnect" href="https://fonts.googleapis.com"/>
+            <link rel="preconnect" href="https://fonts.gstatic.com" />
+            <link href="https://fonts.googleapis.com/css2?family=Anta&display=swap" rel="stylesheet" />
           </Head>
           <Notifications />
           <Layout>
