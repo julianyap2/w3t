@@ -1,1 +1,1 @@
-export const GREEN_PRIMARY = "#5f936b";
+export const GREEN_PRIMARY = "#11BA99";

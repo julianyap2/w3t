@@ -11,6 +11,7 @@ import {
   Group,
   HoverCard,
   Menu,
+  NumberInput,
   Popover,
   ScrollArea,
   SimpleGrid,
@@ -38,13 +39,13 @@ import {
 } from "@tabler/icons-react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-
 import { InternetIdentityButton } from "@bundly/ares-react";
 
 import { GREEN_PRIMARY } from "@app/constants/colors";
 import { useCanister } from "@app/contexts/CanisterContext";
 
 import classes from "./HeaderMegaMenu.module.css";
+import Image from "next/image";
 
 const mockdata = [
   {
@@ -79,11 +80,10 @@ const mockdata = [
   },
 ];
 
-export function HeaderMegaMenu({ client }: { client: any }) {
+export function HeaderMegaMenu() {
   const { requestConnect, principalId, w3tActor } = useCanister();
   const [menuOpen, setMenuOpen] = useState(false);
-
-  const [opened, { close, open }] = useDisclosure(false);
+  const [amount, setAmount] = useState<string | number>(0);
   const theme = useMantineTheme();
   const router = useRouter();
   const links = mockdata.map((item) => (
@@ -103,8 +103,7 @@ export function HeaderMegaMenu({ client }: { client: any }) {
       </Group>
     </UnstyledButton>
   ));
-
-  function detectBrowser() {
+  const DetectBrowser = () => {
     const userAgent = navigator.userAgent.toLowerCase();
     if (
       userAgent.indexOf("chrome") > -1 &&
@@ -123,8 +122,8 @@ export function HeaderMegaMenu({ client }: { client: any }) {
     }
   }
 
-  const handleClick = async () => {
-    const browser = detectBrowser();
+  const checkConnect = async () => {
+    const browser = DetectBrowser();
 
     switch (browser) {
       case "chrome":
@@ -162,20 +161,46 @@ export function HeaderMegaMenu({ client }: { client: any }) {
     }
   };
 
-
-  const openModalConfirmation = () => modals.openConfirmModal({
-    title: 'Connect Wallet',
+  const openModalDeposit = () => modals.openConfirmModal({
+    title: "Deposit",
     children: (
-      <Text size="sm" mb={40}>
-        You Need to Connect Your Wallet First!
-      </Text>
+      <>
+        <Text>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        </Text>
+        <NumberInput 
+          value={amount} 
+          onChange={setAmount} 
+          min={0}
+          hideControls
+          label="Amount"
+          mb={40}
+        />
+      </>
     ),
-    labels: { confirm: 'Connect', cancel: 'Cancel' },
+    labels: {confirm: "Deposit", cancel: "Cancel"},
     confirmProps: { fullWidth: true, color: GREEN_PRIMARY },
     cancelProps: { display: "none" },
-    onConfirm: async () => requestConnect,
+    onConfirm: async () => {
+      alert("function Deposit")
+    },
     centered: true,
   })
+
+  const openModalConfirmation = () =>
+    modals.openConfirmModal({
+      title: "Connect Wallet",
+      children: (
+        <Text size="sm" mb={40}>
+          You Need to Connect Your Wallet First!
+        </Text>
+      ),
+      labels: { confirm: "Connect", cancel: "Cancel" },
+      confirmProps: { fullWidth: true, color: GREEN_PRIMARY },
+      cancelProps: { display: "none" },
+      onConfirm: async () => checkConnect,
+      centered: true,
+    });
 
   const handleClickReportList = () => {
     if (w3tActor) {
@@ -192,78 +217,66 @@ export function HeaderMegaMenu({ client }: { client: any }) {
         background: "black",
       }}>
       <header className={classes.header}>
-        <Group justify="space-between" h="100%">
+        <Group 
+          justify="space-between" 
+          h="100%"
+          style={{
+            paddingLeft: "20px",
+            paddingRight: "20px"
+          }}
+        >
           {/* <MantineLogo size={30} /> */}
-          W3T
+          <Image src={"/logo.png"} width={128} height={40} alt="logoW3T"/>
           <Group h="100%" gap={0} visibleFrom="sm"></Group>
           <Group>
-            <Text 
+            <Text
               onClick={handleClickReportList}
               style={{
-                cursor: "pointer"
+                cursor: "pointer",
               }}
+              mr={20}
             >
               Report List
             </Text>
-            {principalId === "" ? 
-            <Button 
-              onClick={handleClick} 
-              className={classes.buttonConnect} 
-              w={200}
-            >
-              Connect
-            </Button> :
-
-            <Menu
-            width={260}
-            position="bottom-end"
-            transitionProps={{ transition: 'pop-top-right' }}
-            onClose={() => setMenuOpen(false)}
-            onOpen={() => setMenuOpen(true)}
-            withinPortal
-            trigger="click-hover"
-          >
-            <Menu.Target>
-              <Button
-                  className={classes.buttonConnect} 
-                  w={200}
-              >
-                {principalId.slice(0, 5)}...{principalId.slice(-5)}
+            {principalId === "" ? (
+              <Button onClick={checkConnect} className={classes.buttonConnect} w={200}>
+                Connect
               </Button>
-            </Menu.Target>
-            <Menu.Dropdown>
-              <Menu.Item>
-                <Stack
-                  align="stretch"
-                  justify="center"
-                  gap="md"
-                  h={100}
-                >
-                  <Text ta={"center"}>My W3T</Text>
-                  <Group gap={6} justify="center">
-                    <Text fw={500} fz={"2rem"} lh={1} mr={3}>
-                      000 
-                    </Text>
-                    <Avatar 
-                      src={"/placeholder.webp"}
-                      alt="w3t-icon"
-                      radius={"xl"}
-                      size={40}
-                    />
-                  </Group>
-                </Stack>
-              </Menu.Item>
-              <Menu.Divider />
-              <Menu.Item leftSection={<IconCoins size={16} stroke={1.5} />}>
-                Deposit
-              </Menu.Item>
-              <Menu.Item leftSection={<IconLogout2 size={16} stroke={1.5} />}>
-                Disconnect
-              </Menu.Item>
-            </Menu.Dropdown>
-          </Menu>
-            }
-            
+            ) : (
+              <Menu
+                width={260}
+                position="bottom-end"
+                transitionProps={{ transition: "pop-top-right" }}
+                onClose={() => setMenuOpen(false)}
+                onOpen={() => setMenuOpen(true)}
+                withinPortal
+                trigger="click-hover">
+                <Menu.Target>
+                  <Button className={classes.buttonConnect} w={200}>
+                    {principalId.slice(0, 5)}...{principalId.slice(-5)}
+                  </Button>
+                </Menu.Target>
+                <Menu.Dropdown>
+                  <Menu.Item>
+                    <Stack align="stretch" justify="center" gap="md" h={100}>
+                      <Text ta={"center"}>My W3T</Text>
+                      <Group gap={6} justify="center">
+                        <Text fw={500} fz={"2rem"} lh={1} mr={13}>
+                          000
+                        </Text>
+                        <Avatar src={"/token.png"} alt="w3t-icon" radius={"xl"} size={40} />
+                      </Group>
+                    </Stack>
+                  </Menu.Item>
+                  <Menu.Divider />
+                  <Menu.Item 
+                    leftSection={<IconCoins size={16} stroke={1.5} />}
+                    onClick={openModalDeposit}
+                  >Deposit</Menu.Item>
+                  <Menu.Item leftSection={<IconLogout2 size={16} stroke={1.5} />}>Disconnect</Menu.Item>
+                </Menu.Dropdown>
+              </Menu>
+            )}
           </Group>
         </Group>
       </header>

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { idlFactory } from "../declarations/w3t/w3t.did.js";
 
 interface CanisterContextType {
@@ -12,7 +12,12 @@ const CanisterContext = createContext<CanisterContextType | undefined>(undefined
 export const CanisterProvider = ({ children }: { children: ReactNode }) => {
   const [principalId, setPrincipalId] = useState("");
   const [w3tActor, setW3tActor] = useState<any>(null);
-  const plugExtension = window.ic?.plug;
+  let plugExtension:any = null;
+
+  useEffect(() => {
+    plugExtension = window.ic?.plug
+  }, [])
+  
   const w3tCanisterId = process.env.NEXT_PUBLIC_W3T_CANISTER_ID ?? "";
 
   const requestConnect = async () => {

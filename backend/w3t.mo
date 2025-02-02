@@ -17,9 +17,11 @@ shared ({caller = _owner}) actor class W3T(
   }
 ) = this {
     type ViolationType = {
-        #LLAJ222009_291;
-        #LLAJ222009_287;
-        #LLAJ222009_283;
+      chapter: Nat;
+      clause: Nat;
+      fine: Nat;
+      briefDescription: Text;
+      completeDescription: Text;
     };
 
     type ReportStatus = {
@@ -31,7 +33,7 @@ shared ({caller = _owner}) actor class W3T(
 
     type Report = {
       reporter: Principal;
-      police: Principal;
+      police: ?Principal;
       violationType: ViolationType;
       status: ReportStatus;
       licenseNumber: Text;
@@ -55,6 +57,14 @@ shared ({caller = _owner}) actor class W3T(
     stable var addressReportMap = Map.new<Text, [Text]>();
     stable var reports = Map.new<Text, Report>();
     stable var videosReportMap = Map.new<Text, [Blob]>();
+    stable var violations: [ViolationType] = [
+      {chapter = 283; clause = 1; fine = 750000; briefDescription = "Mengemudi Ugal - Ugalan"; completeDescription = "Setiap orang yang mengemudikan Kendaraan Bermotor di Jalan secara tidak wajar dan melakukan kegiatan lain atau dipengaruhi oleh suatu keadaan yang mengakibatkan gangguan konsentrasi dalam mengemudi di Jalan sebagaimana dimaksud dalam Pasal 106 ayat (1) dipidana dengan pidana kurungan paling lama 3 (tiga) bulan atau denda paling banyak Rp750.000,00 (tujuh ratus lima puluh ribu rupiah).";},
+      {chapter = 287; clause = 1; fine = 500000; briefDescription = "Melanggar Marka Jalan"; completeDescription = "Setiap orang yang mengemudikan Kendaraan Bermotor di Jalan yang melanggar aturan perintah atau larangan yang dinyatakan dengan Rambu Lalu Lintas sebagaimana dimaksud dalam Pasal 106 ayat (4) huruf a atau Marka Jalan sebagaimana dimaksud dalam Pasal 106 ayat (4) huruf b dipidana dengan pidana kurungan paling lama 2 (dua) bulan atau denda paling banyak Rp500.000,00 (lima ratus ribu rupiah).";},      
+      {chapter = 287; clause = 2; fine = 500000; briefDescription = "Melanggar Lampu Merah"; completeDescription = "Setiap orang yang mengemudikan Kendaraan Bermotor di Jalan yang melanggar aturan perintah atau larangan yang dinyatakan dengan Alat Pemberi Isyarat Lalu Lintas sebagaimana dimaksud dalam Pasal 106 ayat (4) huruf c dipidana dengan pidana kurungan paling lama 2 (dua) bulan atau denda paling banyak Rp500.000,00 (lima ratus ribu rupiah).";},
+      {chapter = 287; clause = 3; fine = 250000; briefDescription = "Parkir Sembarangan"; completeDescription = "Setiap orang yang mengemudikan Kendaraan Bermotor di Jalan yang melanggar aturan gerakan lalu lintas sebagaimana dimaksud dalam Pasal 106 ayat (4) huruf d atau tata cara berhenti dan Parkir sebagaimana dimaksud dalam Pasal 106 ayat (4) huruf e dipidana dengan pidana kurungan paling lama 1 (satu) bulan atau denda paling banyak Rp250.000,00 (dua ratus lima puluh ribu rupiah).";},   
+      {chapter = 291; clause = 1; fine = 250000; briefDescription = "Tidak Menggunakan Helm SNI"; completeDescription = "Setiap orang yang mengemudikan Sepeda Motor tidak mengenakan helm standar nasional Indonesia sebagaimana dimaksud dalam Pasal 106 ayat (8) dipidana dengan pidana kurungan paling lama 1 (satu) bulan atau denda paling banyak Rp250.000,00 (dua ratus lima puluh ribu rupiah).";},   
+      {chapter = 291; clause = 2; fine = 250000; briefDescription = "Penumpang Tidak Mengunakan Helm"; completeDescription = "Setiap orang yang mengemudikan Sepeda Motor yang membiarkan penumpangnya tidak mengenakan helm sebagaimana dimaksud dalam Pasal 106 ayat (8) dipidana dengan pidana kurungan paling lama 1 (satu) bulan atau denda paling banyak Rp250.000,00 (dua  ratus lima puluh ribu rupiah).";}    
+    ];
     
     let w3tToken : ICRC.Actor = actor (init_args.token_canister_id);
     stable var balanceOf = Map.new<Text, Nat>();
@@ -98,7 +108,7 @@ shared ({caller = _owner}) actor class W3T(
         case (?_report) {
           let updateReport: Report = {
             reporter = _report.reporter;
-            police = _report.police;
+            police = ?caller;
             violationType = _report.violationType;
             status = status;
             licenseNumber = _report.licenseNumber;
@@ -115,6 +125,13 @@ shared ({caller = _owner}) actor class W3T(
       };
 
       return #ok("Status has been updated.");
+    };
+
+    public shared ({caller}) func addViolation (violation: ViolationType) : async TextResponse {
+      if (Principal.isAnonymous(caller) or (getRole(caller) != #Police)) return #err(#userNotAuthorized);
+
+      violations := Array.append(violations, [violation]);
+      return #ok("Success adding violation.");
     };
 
     // ==============================================================================================================================
@@ -157,13 +174,9 @@ shared ({caller = _owner}) actor class W3T(
       return collectedReports;
     };
 
-    public shared func getViolationDescriptions() : async Result.Result<[(Text, Text)], GeneralError> {
-      var violationDescriptions = Map.new<Text, Text>();
-      Map.set(violationDescriptions, Map.thash, "LLAJ222009_291", "Tidak pakai helm");
-      Map.set(violationDescriptions, Map.thash, "LLAJ222009_287", "Parkir sembarangan");
-      Map.set(violationDescriptions, Map.thash, "LLAJ222009_283", "Melanggar rambu");
-      
-      return #ok(Iter.toArray(Map.entries(violationDescriptions)));
+    public query ({caller}) func getViolationDescriptions() : async Result.Result<[ViolationType], GeneralError> {
+      if (Principal.isAnonymous(caller)) return #err(#userNotAuthorized);
+      return #ok(violations);
     };
 
     public shared ({caller}) func submitReport(report: Report) : async TextResponse {
