@@ -239,7 +239,7 @@ export function HeaderMegaMenu() {
               Report List
             </Text>
             {principalId === "" ? (
-              <Button onClick={checkConnect} className={classes.buttonConnect} w={200}>
+              <Button onClick={checkConnect} w={200} color={GREEN_PRIMARY}>
                 Connect
               </Button>
             ) : (
