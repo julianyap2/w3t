@@ -45,6 +45,7 @@ import { GREEN_PRIMARY } from "@app/constants/colors";
 import { useCanister } from "@app/contexts/CanisterContext";
 
 import classes from "./HeaderMegaMenu.module.css";
+import Image from "next/image";
 
 const mockdata = [
   {
@@ -216,16 +217,25 @@ export function HeaderMegaMenu({ client }: { client: any }) {
         background: "black",
       }}>
       <header className={classes.header}>
-        <Group justify="space-between" h="100%">
+        <Group 
+          justify="space-between" 
+          h="100%"
+          style={{
+            paddingLeft: "20px",
+            paddingRight: "20px"
+          }}
+        >
           {/* <MantineLogo size={30} /> */}
-          W3T
+          <Image src={"/logo.png"} width={128} height={40} alt="logoW3T"/>
           <Group h="100%" gap={0} visibleFrom="sm"></Group>
           <Group>
             <Text
               onClick={handleClickReportList}
               style={{
                 cursor: "pointer",
-              }}>
+              }}
+              mr={20}
+            >
               Report List
             </Text>
             {principalId === "" ? (
@@ -251,10 +261,10 @@ export function HeaderMegaMenu({ client }: { client: any }) {
                     <Stack align="stretch" justify="center" gap="md" h={100}>
                       <Text ta={"center"}>My W3T</Text>
                       <Group gap={6} justify="center">
-                        <Text fw={500} fz={"2rem"} lh={1} mr={3}>
+                        <Text fw={500} fz={"2rem"} lh={1} mr={13}>
                           000
                         </Text>
-                        <Avatar src={"/placeholder.webp"} alt="w3t-icon" radius={"xl"} size={40} />
+                        <Avatar src={"/token.png"} alt="w3t-icon" radius={"xl"} size={40} />
                       </Group>
                     </Stack>
                   </Menu.Item>
