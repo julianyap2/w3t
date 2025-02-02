@@ -4,9 +4,10 @@ export interface Plug {
     isConnected: () => Promise<boolean>;
     disconnect: () => Promise<void>;
     createActor: <T>(options: {
-        canisterId: [string];
+        canisterId: string;
         interfaceFactory: any;
     }) => Promise<T>;
+    createAgent: (options: { whitelist: [string] }) => any;
     requestTransfer: (args: {
         to: string;
         amount: number;

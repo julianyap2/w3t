@@ -14,6 +14,7 @@ import { MantineProvider } from "@mantine/core";
 import { Notifications } from '@mantine/notifications';
 import { theme } from "../../theme";
 import Layout from "../components/Layout/Layout";
+import { CanisterProvider } from "@app/contexts/CanisterContext";
 
 export default function MyApp({ Component, pageProps }: AppProps) {
   const client = Client.create({
@@ -30,22 +31,24 @@ export default function MyApp({ Component, pageProps }: AppProps) {
 
   return (
     <IcpConnectContextProvider client={client}>
-      <MantineProvider defaultColorScheme="dark" theme={theme}>
-        <ModalsProvider>
-          <Head>
-            <title>W3Tilang</title>
-            <meta
-              name="viewport"
-              content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no"
-            />
-            <link rel="shortcut icon" href="/favicon.svg" />
-          </Head>
-          <Notifications />
-          <Layout client={client}>
-            <Component {...pageProps} />
-          </Layout>
-        </ModalsProvider>
-      </MantineProvider>
+      <CanisterProvider>
+        <MantineProvider defaultColorScheme="dark" theme={theme}>
+          <ModalsProvider>
+            <Head>
+              <title>W3Tilang</title>
+              <meta
+                name="viewport"
+                content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no"
+              />
+              <link rel="shortcut icon" href="/favicon.svg" />
+            </Head>
+            <Notifications />
+            <Layout client={client}>
+              <Component {...pageProps} />
+            </Layout>
+          </ModalsProvider>
+        </MantineProvider>
+      </CanisterProvider>
     </IcpConnectContextProvider>
   );
 }
