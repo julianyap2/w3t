@@ -7,12 +7,10 @@ import { CandidActors } from "@app/canisters";
 
 import type { Report, UidReport } from "../../declarations/w3t/w3t.did";
 import BinaryJul from "./test.js";
+import { useCanister } from "@app/contexts/CanisterContext";
 
 const DetailReport = ({ detailDataArray }: { detailDataArray: UidReport }) => {
-  const { isAuthenticated, currentIdentity, changeCurrentIdentity } = useAuth();
-  const w3t = useCandidActor<CandidActors>("w3t", currentIdentity, {
-    canisterId: process.env.NEXT_PUBLIC_W3T_CANISTER_ID,
-  }) as CandidActors["w3t"];
+  const { w3tActor, principalId } = useCanister();
 
   let detailData: Report = detailDataArray[1];
 
@@ -48,6 +46,8 @@ const DetailReport = ({ detailDataArray }: { detailDataArray: UidReport }) => {
     return <Box>{detailData.violationType.briefDescription}</Box>;
   };
 
+  
+
   const testBlob: Uint8Array = new Uint8Array(BinaryJul);
   const videoBlob = new Blob([testBlob], { type: "video/mp4" });
   const videoURL = URL.createObjectURL(videoBlob);
@@ -56,7 +56,7 @@ const DetailReport = ({ detailDataArray }: { detailDataArray: UidReport }) => {
     let index: bigint = BigInt(0);
 
     while (true) {
-      const response = await w3t.getVideoChunk(fileId, index);
+      const response = await w3tActor.getVideoChunk(fileId, index);
       if ("err" in response) break;
       const chunk = "ok" in response ? response.ok : undefined;
       chunks.push(chunk);

@@ -80,7 +80,7 @@ const mockdata = [
   },
 ];
 
-export function HeaderMegaMenu({ client }: { client: any }) {
+export function HeaderMegaMenu() {
   const { requestConnect, principalId, w3tActor } = useCanister();
   const [menuOpen, setMenuOpen] = useState(false);
   const [amount, setAmount] = useState<string | number>(0);
