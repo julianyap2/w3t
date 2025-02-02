@@ -15,7 +15,7 @@ import { useCanister } from "@app/contexts/CanisterContext";
 const listReport = () => {
   const router = useRouter();
   const [role, setRole] = useState<string>("police");
-  const [reports, setReports] = useState<Report[] | undefined>(undefined);
+  const [reports, setReports] = useState<UidReport[]>();
   const {w3tActor} = useCanister()
 
   useEffect(() => {
@@ -42,7 +42,7 @@ const listReport = () => {
 
   async function getReports() {
     try {
-      const response = await w3tActor.getAllReports();
+      const response = await w3tActor.getMyReports();
       if ("err" in response) {
         if ("userNotAuthorized" in response.err) console.log("User Not Authorized");
         else console.log("Error fetching Report");
@@ -201,7 +201,7 @@ const listReport = () => {
 
   const policeTable = useMantineReactTable({
     columns,
-    data: mockReports,
+    data: reports!,
     enablePagination: false,
     enableRowActions: true,
     renderRowActionMenuItems: ({ row }: { row: any }) => {
@@ -219,7 +219,7 @@ const listReport = () => {
 
   const userTable = useMantineReactTable({
     columns,
-    data: mockReports,
+    data: reports!,
     enablePagination: false,
     enableRowActions: true,
     renderRowActionMenuItems: ({ row }: { row: any }) => {

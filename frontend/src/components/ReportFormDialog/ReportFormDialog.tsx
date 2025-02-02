@@ -133,8 +133,8 @@ const ReportFormDialog = () => {
                 }
                 const res = await w3tActor.submitReport(report);
                 const response: string = "ok" in res ? res.ok : "";
-                uploadFile(response)
-                setIsSubmitting(false)
+                await uploadFile(response)
+                
                 reportForm.reset();
                 notifications.show({
                     title: "Success!",
@@ -151,6 +151,7 @@ const ReportFormDialog = () => {
                     icon: <IconX/>
                 })
             }
+            setIsSubmitting(false)
         }
     }
 
