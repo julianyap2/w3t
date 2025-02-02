@@ -33,6 +33,7 @@ import { InternetIdentityButton } from '@bundly/ares-react';
 import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import { useCanister } from '@app/contexts/CanisterContext';
   
   const mockdata = [
     {
@@ -68,9 +69,10 @@ import { useEffect, useState } from 'react';
   ];
   
   export function HeaderMegaMenu({ client } : {client: any}) {
+    const { requestConnect, principalId } = useCanister();
+    
     const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
     const [linksOpened, { toggle: toggleLinks }] = useDisclosure(false);
-    const [principalId, setPrincipalId] = useState("");
     const theme = useMantineTheme();
     const router = useRouter()
     const links = mockdata.map((item) => (
@@ -90,22 +92,6 @@ import { useEffect, useState } from 'react';
         </Group>
       </UnstyledButton>
     ));
-
-    const isPlugExtensionExist = !!window.ic?.plug;
-    const plugExtension = window.ic!.plug;
-
-    useEffect(() => {
-      init();
-    }, []);
-
-    async function init() {
-      if(isPlugExtensionExist) {
-        const isConnected = await window.ic!.plug.isConnected();
-          if(isConnected){
-            setPrincipalId(window.ic!.plug.principalId);
-          }
-      }
-    }
 
     function detectBrowser() {
       const userAgent = navigator.userAgent.toLowerCase();
@@ -130,29 +116,9 @@ import { useEffect, useState } from 'react';
         case 'edge':
           // Chrome and Edge extension check
           try {
-            // router.reload();
-            
-            if(isPlugExtensionExist) {
-              const isConnected = await plugExtension.isConnected();
-              if(!isConnected) {
-                const whitelist: [string] = [process.env.NEXT_PUBLIC_W3T_CANISTER_ID!]
-                const req = await plugExtension.requestConnect({whitelist});
-                if(req) window.location.reload();
-              } else {
-                setPrincipalId(plugExtension.principalId);
-              }
-            } else {
-              window.open("https://chromewebstore.google.com/detail/plug/cfbfdhimifdmdehjmkdobpcjfefblkjm", "_blank")
-            }
-            // await chrome.runtime.sendMessage('jnldfbidonfeldmalbflbmlebbipcnle', { type: 'checkExtension' }, (response) => {
-            //   if (response && response.exists) {
-            //     console.log(`${browser} extension is installed`);
-            //   } else {
-            //     console.log(`${browser} extension is not installed1`);
-            //   }
-            // });
+            requestConnect();
           } catch (error) {
-            console.log(`${browser} extension is not installed`);
+            console.log("Failed to connect to canister:", error);
           }
           break;
     
