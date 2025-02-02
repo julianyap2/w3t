@@ -32,7 +32,7 @@ export default function IcConnectPage() {
   const openModalForm = () => modals.open({
     title: 'Report Form',
     children: (
-      <ReportFormDialog  w3tActor={w3tActor}/>
+      <ReportFormDialog />
     ),
     size: 'lg',
     centered: true,

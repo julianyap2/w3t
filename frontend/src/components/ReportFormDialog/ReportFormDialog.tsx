@@ -6,12 +6,15 @@ import { notifications } from "@mantine/notifications";
 import { IconCheck, IconX } from "@tabler/icons-react";
 import { Principal } from '@dfinity/principal';
 import { ViolationType } from "@app/declarations/w3t/w3t.did";
+import { useCanister } from "@app/contexts/CanisterContext";
 
 interface ReportFormDialogProps {
     w3tActor: any;
 }
 
-const ReportFormDialog = ({w3tActor} : ReportFormDialogProps) => {    
+const ReportFormDialog = () => {    
+      const { principalId, w3tActor } = useCanister();
+    
     const [loadingUpload, setLoadingUpload] = useState<boolean>(false);
     const [violationTypeStringArray, setViolationTypeStringArray] = useState<string[]>();
     const [violationTypeArray, setViolationTypeArray] = useState<ViolationType[]>();
@@ -105,6 +108,7 @@ const ReportFormDialog = ({w3tActor} : ReportFormDialogProps) => {
         if(reportForm.values.video){
             try {
                 handleVideo(reportForm.values.video)
+                const violationTypeIndex = violationTypeArray?.find((x) => reportForm.values.violationType == x.briefDescription);
                 let report: any = {
                     "status": {
                         "OnValidationProcess": null
@@ -116,9 +120,9 @@ const ReportFormDialog = ({w3tActor} : ReportFormDialogProps) => {
                     "policeReportNumber": [""],
                     "licenseNumber": reportForm.values.licenseNumber,
                     "validatedAt": [],
-                    "reporter": Principal.fromText('aaaaa-aa'),
-                    "violationType": violationTypeArray?.indexOf((x) => {reportForm.values.violationType == x.briefDescription}),
-                    "police":  null,
+                    "reporter": principalId,
+                    "violationType": violationTypeIndex,
+                    "police": null,
                 }
                 const res = await w3tActor.submitReport(report);
                 uploadFile(res)
