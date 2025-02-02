@@ -55,7 +55,7 @@ export default function HomePage() {
                 gap="md"
               >
                 <Box className={styles.title}>
-                  W3T
+                  Web3 Tilang
                 </Box>
                 <Box className={styles.subTitle}>
                   Project Description
@@ -115,7 +115,7 @@ export default function HomePage() {
                   gap="md"
                 >
                   <Box className={styles.title}>
-                    Why W3T
+                    W3T Token
                   </Box>
                   <Box  className={styles.subTitle}>
                     Why W3T Description
