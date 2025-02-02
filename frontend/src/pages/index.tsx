@@ -4,7 +4,7 @@ import styles from "../../../styles/index.module.css";
 import { LogoutButton, useAuth, useCandidActor, useIdentities } from "@bundly/ares-react";
 
 import { CandidActors } from "@app/canisters";
-import { Box, Button, Grid, Stack } from "@mantine/core";
+import { Box, Button, Grid, Stack, Text } from "@mantine/core";
 import Layout from "@app/components/Layout/Layout";
 import Image from "next/image";
 
@@ -27,7 +27,7 @@ export default function IcConnectPage() {
   const [loading, setLoading] = useState(false); // State for loader
   const [isShowReportForm, setIsShowReportForm] = useState(false);
 
-  const { w3tActor } = useCanister();
+  const { w3tActor, requestConnect } = useCanister();
 
   const openModalForm = () => modals.open({
     title: 'Report Form',
@@ -35,11 +35,22 @@ export default function IcConnectPage() {
       <ReportFormDialog  w3tActor={w3tActor}/>
     ),
     size: 'lg',
-    // labels: { confirm: 'Approve', cancel: 'Reject' },
-    // confirmProps: { color: GREEN_PRIMARY},
-    // onCancel: () => console.log('Cancel'),
-    // onConfirm: () => console.log('Confirmed'),
+    centered: true,
   });
+
+  const openModalConfirmation = () => modals.openConfirmModal({
+    title: 'Connect Wallet',
+    children: (
+      <Text size="sm" mb={40}>
+        You Need to Connect Your Wallet First!
+      </Text>
+    ),
+    labels: { confirm: 'Connect', cancel: 'Cancel' },
+    confirmProps: { fullWidth: true, color: GREEN_PRIMARY },
+    cancelProps: { display: "none" },
+    onConfirm: async () => requestConnect,
+    centered: true,
+  })
 
   function formatPrincipal(principal: string): string {
     const parts = principal.split("-");
@@ -84,7 +95,13 @@ export default function IcConnectPage() {
               <Button
                 variant="filled"
                 color={GREEN_PRIMARY}
-                onClick={() => openModalForm()}
+                onClick={() => { 
+                  if(w3tActor){
+                    openModalForm()
+                  }else{
+                    openModalConfirmation()
+                  }
+                }}
                 // onClick={() => uploadFile(fileUid)}
               >
                 Upload Your Evidence
