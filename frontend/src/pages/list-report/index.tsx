@@ -15,7 +15,7 @@ import { useCanister } from "@app/contexts/CanisterContext";
 const listReport = () => {
   const router = useRouter();
   const [role, setRole] = useState<string>("police");
-  const [reports, setReports] = useState<UidReport[]>();
+  const [reports, setReports] = useState<UidReport[]>([]);
   const {w3tActor} = useCanister()
 
   useEffect(() => {
@@ -48,7 +48,7 @@ const listReport = () => {
         else console.log("Error fetching Report");
       }
 
-      const reportList: any = "ok" in response ? response.ok : undefined;
+      const reportList: any = "ok" in response ? response.ok : [];
       console.log(reportList);
       setReports(reportList);
     } catch (error) {
@@ -201,7 +201,7 @@ const listReport = () => {
 
   const policeTable = useMantineReactTable({
     columns,
-    data: reports!,
+    data: reports,
     enablePagination: false,
     enableRowActions: true,
     renderRowActionMenuItems: ({ row }: { row: any }) => {
@@ -241,12 +241,6 @@ const listReport = () => {
         style={{
           paddingTop: "40px",
         }}>
-        {/* {reports && reports.length > 0 && (
-        <MantineReactTable
-          columns={columns}
-          data={reports}
-        />
-      )} */}
 
         {role === "police" ? (
           <MantineReactTable table={policeTable} />

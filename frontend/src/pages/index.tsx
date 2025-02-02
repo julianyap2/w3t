@@ -100,10 +100,10 @@ export default function HomePage() {
       <Box className="centerContainer">
         <Grid
           style={{
-            paddingTop:"100px"
+            paddingTop:"80px"
           }}
         >
-          <Grid.Col span={{ base: 12, md: 6, lg: 6 }}>
+          <Grid.Col span={{ base: 8 }}>
             <Stack
               align="flex-start"
               justify="space-between"
@@ -111,15 +111,17 @@ export default function HomePage() {
               h={"100%"}
             >
               <Stack
+                
                 align="stretch"
                 justify="flex-start"
                 gap="md"
+                mr={"3rem"}
               >
                 <Box className={styles.title}>
-                  Web3 Tilang
+                  Report & Earn !
                 </Box>
                 <Box className={styles.subTitle}>
-                  Project Description
+                  Our app W3T stands for Web3 Tilang, empowers citizens to report traffic violations securely on-chain. Verified reports approved by law enforcement earn rewards, ensuring a transparent, tamper-proof, and incentivized system for safer roads. Take action, drive change!
                 </Box>
               </Stack>
               <Button
@@ -132,24 +134,25 @@ export default function HomePage() {
                     openModalConfirmation()
                   }
                 }}
+                mt={"2rem"}
               >
                 Upload Your Evidence
               </Button>
             </Stack>
           </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 6, lg: 6 }}>
+          <Grid.Col span={{ base: 4 }} style={{ display: "flex", alignItems: "center", justifyContent: "flex-end"}}>
             <Box className={styles.imageContainer}>
-              <Image 
-                src={"/home1.webp"}
-                width={300}
-                alt="home1"
-                style={{
-                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2),0 6px 20px rgba(0, 0, 0, 0.19)",
-                  borderRadius: "10px"
-                }}
-                height={300}
-              />
-            </Box>
+                <Image 
+                  src={"/home1.webp"}
+                  width={300}
+                  alt="home1"
+                  style={{
+                    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2),0 6px 20px rgba(0, 0, 0, 0.19)",
+                    borderRadius: "10px"
+                  }}
+                  height={300}
+                />
+              </Box>
           </Grid.Col>
         </Grid>
         <Grid
@@ -157,7 +160,7 @@ export default function HomePage() {
             marginTop:"100px"
           }}
         >
-            <Grid.Col span={{ base: 12, md: 6, lg: 6 }}>
+            <Grid.Col span={{ base: 4 }} style={{ display: "flex", alignItems: "center" }}>
               <Box className={styles.imageContainer}>
                 <Image 
                   src={"/home2.webp"}
@@ -167,12 +170,12 @@ export default function HomePage() {
                 />
               </Box>
             </Grid.Col>
-            <Grid.Col span={{ base: 12, md: 6, lg: 6 }}>
+            <Grid.Col span={{ base: 8 }}>
               <Stack
                 align="flex-start"
                 justify="space-between"
                 gap="md"
-                h={"100%"}
+                
               >
                 <Stack
                   align="stretch"
@@ -183,12 +186,13 @@ export default function HomePage() {
                     W3T Token
                   </Box>
                   <Box  className={styles.subTitle}>
-                    Why W3T Description
+                  W3T is our native token built on the ICP blockchain, designed to ensure credible and honest traffic violation reports. Users must stake W3T before submitting a report, preventing spam and false claims. 
                   </Box>
                 </Stack>
                 <Button
                   variant="filled"
                   color={GREEN_PRIMARY}
+                  mt={"2rem"}
                 >
                   Get Yours
                 </Button>
