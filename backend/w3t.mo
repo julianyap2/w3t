@@ -278,10 +278,10 @@ shared ({caller = _owner}) actor class W3T(
       };
     };
 
-    public func getToken () : async TextResponse {
+    public func checkTokenConnection () : async TextResponse {
       try {
-        let _ = await w3tToken.icrc1_symbol();
-        #ok("Successfully connected to token canister");
+        let symbol = await w3tToken.icrc1_symbol();
+        #ok("Successfully connected to token canister: " #symbol);
       } catch (_) {
         #err(#failedToConnect);
       }
