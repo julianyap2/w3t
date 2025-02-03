@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Inter, Noto_Sans } from "next/font/google";
 
 import { HeaderMegaMenu } from "../HeaderMegaMenu/HeaderMegaMenu";
+import Footer from "../Footer/Footer";
 
 const noto = Noto_Sans({
   subsets: ["latin"],
@@ -18,6 +19,7 @@ const Layout = ({ children }: { children: any }) => {
         <Box  className={noto.className}>
           <HeaderMegaMenu />
           {children}
+          <Footer />
         </Box>
   );
 };

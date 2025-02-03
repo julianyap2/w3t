@@ -310,7 +310,7 @@ const listReport = () => {
 
   const policeTable = useMantineReactTable({
     columns,
-    data: reports,
+    data: reports!,
     enablePagination: false,
     enableRowActions: true,
     renderRowActionMenuItems: ({ row }: { row: any }) => {

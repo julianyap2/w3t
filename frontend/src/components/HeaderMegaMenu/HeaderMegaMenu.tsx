@@ -187,7 +187,7 @@ export function HeaderMegaMenu() {
       </>
     ),
     labels: {confirm: "Deposit", cancel: "Cancel"},
-    confirmProps: { fullWidth: true, color: GREEN_PRIMARY },
+    confirmProps: depositAmount === 0 ? { fullWidth: true, color: GREEN_PRIMARY, disabled: true } : { fullWidth: true, color: GREEN_PRIMARY },
     cancelProps: { display: "none" },
     closeOnConfirm: false,
     onConfirm: async () => {
@@ -221,7 +221,7 @@ export function HeaderMegaMenu() {
     ),
     
     labels: {confirm: "Withdraw", cancel: "Cancel"},
-    confirmProps: { fullWidth: true, color: GREEN_PRIMARY },
+    confirmProps: withdrawAmount === 0 ? { disabled: true, fullWidth: true, color: GREEN_PRIMARY } :{ fullWidth: true, color: GREEN_PRIMARY },
     cancelProps: { display: "none" },
     closeOnConfirm: false,
     onConfirm: async () => {

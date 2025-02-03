@@ -1,0 +1,14 @@
+.allContainer{
+    border-top: 1px solid #424242;
+    background: black;
+}
+
+.insideContainer{
+    padding-left: 36px;
+    padding-right: 36px;
+    height: 80px;
+}
+
+.imageFooter{
+    cursor: pointer;
+}
