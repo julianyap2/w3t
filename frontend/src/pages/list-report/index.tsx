@@ -18,7 +18,7 @@ const listReport = () => {
   const { w3tActor } = useCanister();
   const router = useRouter();
   const [role, setRole] = useState<string>("police");
-  const [reports, setReports] = useState<UidReport[] | undefined>(undefined);
+  const [reports, setReports] = useState<UidReport[]>([]);
   // const [policeReportNumbers, setPoliceReportNumbers] = useState('');
 
   useEffect(() => {

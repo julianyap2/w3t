@@ -5,10 +5,12 @@ import { useEffect, useState } from "react";
 import { useCanister } from "@app/contexts/CanisterContext";
 
 import type { Report, UidReport } from "../../declarations/w3t/w3t.did";
+import { error } from "console";
 
 const DetailReport = ({ detailDataArray }: { detailDataArray: UidReport }) => {
   const { w3tActor, principalId } = useCanister();
   const [videoURL, setVideoURL] = useState<any>();
+  const [videoChunks, setVideoChunks] = useState<Number[]>([]);
 
   let detailData: Report = detailDataArray[1];
 
@@ -45,27 +47,42 @@ const DetailReport = ({ detailDataArray }: { detailDataArray: UidReport }) => {
   };
 
   const fetchVideoChunks = async (fileId: string) => {
-    let chunks = [];
+    console.log(`Entering fetch video chunks`);
+    let chunks: number[] = [];
     let index: bigint = BigInt(0);
 
     while (true) {
+      console.log(`Entering loop: ${index}`);
       const response = await w3tActor.getVideoChunk(fileId, index);
-      if ("err" in response) break;
+      if ("err" in response) {
+        console.log(`Error: ${response.err}`);
+        break;
+      };
       const chunk = "ok" in response ? response.ok : undefined;
+      console.log(`Ok.`);
       chunks.push(chunk);
       index++;
     }
-    console.log(chunks);
+    console.log(`Ended fetch video chunks. Length: ${chunks.length}`);
     return chunks;
   };
 
   useEffect(() => {
-    let binaryTemp: any = fetchVideoChunks(detailDataArray[0]);
+    console.log(`Uid: ${detailDataArray[0]}`)
+    setVideoChunks(fetchVideoChunks(detailDataArray[0]));
+    console.log(` temp length: ${binaryTemp.length}`);
 
-    const testBlob: Uint8Array = new Uint8Array(binaryTemp);
-    const videoBlob = new Blob([testBlob], { type: "video/mp4" });
-    setVideoURL(URL.createObjectURL(videoBlob));
+    
   }, []);
+
+  useEffect(() => {
+    const testBlob: Uint8Array = new Uint8Array(videoChunks);
+    console.log(`Success creating new array`);
+    const videoBlob = new Blob([testBlob], { type: "video/mp4" });
+    console.log(`Success creating video blob`);
+    setVideoURL(URL.createObjectURL(videoBlob));
+    console.log(`video url: ${videoURL}`);
+  }, videoChunks);
 
   return (
     <Box>
