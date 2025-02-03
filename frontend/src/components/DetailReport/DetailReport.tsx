@@ -10,7 +10,8 @@ import { error } from "console";
 const DetailReport = ({ detailDataArray }: { detailDataArray: UidReport }) => {
   const { w3tActor, principalId } = useCanister();
   const [videoURL, setVideoURL] = useState<any>();
-  const [videoChunks, setVideoChunks] = useState<Number[]>([]);
+  const [videoChunks, setVideoChunks] = useState<Blob[]>([]);
+  const [chunksCount, setChunksCount] = useState(0);
 
   let detailData: Report = detailDataArray[1];
 
@@ -48,7 +49,7 @@ const DetailReport = ({ detailDataArray }: { detailDataArray: UidReport }) => {
 
   const fetchVideoChunks = async (fileId: string) => {
     console.log(`Entering fetch video chunks`);
-    let chunks: number[] = [];
+    let chunks: Blob[] = [];
     let index: bigint = BigInt(0);
 
     while (true) {
@@ -61,6 +62,11 @@ const DetailReport = ({ detailDataArray }: { detailDataArray: UidReport }) => {
       const chunk = "ok" in response ? response.ok : undefined;
       console.log(`Ok.`);
       chunks.push(chunk);
+      setVideoChunks(chunks);
+      const videoBlob = new Blob(chunks, { type: "video/mp4" });
+      console.log(`Success creating video blob`);
+      setVideoURL(URL.createObjectURL(videoBlob));
+      console.log(`video url: ${videoURL}`);
       index++;
     }
     console.log(`Ended fetch video chunks. Length: ${chunks.length}`);
@@ -69,20 +75,9 @@ const DetailReport = ({ detailDataArray }: { detailDataArray: UidReport }) => {
 
   useEffect(() => {
     console.log(`Uid: ${detailDataArray[0]}`)
-    setVideoChunks(fetchVideoChunks(detailDataArray[0]));
-    console.log(` temp length: ${binaryTemp.length}`);
-
-    
+    fetchVideoChunks(detailDataArray[0]);
   }, []);
 
-  useEffect(() => {
-    const testBlob: Uint8Array = new Uint8Array(videoChunks);
-    console.log(`Success creating new array`);
-    const videoBlob = new Blob([testBlob], { type: "video/mp4" });
-    console.log(`Success creating video blob`);
-    setVideoURL(URL.createObjectURL(videoBlob));
-    console.log(`video url: ${videoURL}`);
-  }, videoChunks);
 
   return (
     <Box>

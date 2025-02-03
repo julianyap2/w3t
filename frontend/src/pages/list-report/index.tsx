@@ -141,80 +141,6 @@ const listReport = () => {
       })
     }
   }
-  // Example Principal instances
-  const examplePrincipal1 = Principal.fromText("2vxsx-fae");
-  const examplePrincipal2 = Principal.fromText("aaaaa-aa");
-  const mockReports: UidReport[] = [
-    [
-      "iniUId",
-      {
-        status: { NotGuilty: null },
-        rewardAmount: BigInt(1000),
-        rewardPaidAt: [],
-        stakeAmount: BigInt(500),
-        submittedAt: [BigInt(Date.now())],
-        policeReportNumber: ["PR12345"],
-        licenseNumber: "ABC123",
-        validatedAt: [BigInt(Date.now())],
-        reporter: examplePrincipal1,
-        violationType: {
-          chapter: BigInt(283),
-          clause: BigInt(1),
-          fine: BigInt(750000),
-          briefDescription: "Mengemudi Ugal - Ugalan",
-          completeDescription:
-            "Setiap orang yang mengemudikan Kendaraan Bermotor di Jalan secara tidak wajar dan melakukan kegiatan lain atau dipengaruhi oleh suatu keadaan yang mengakibatkan gangguan konsentrasi dalam mengemudi di Jalan sebagaimana dimaksud dalam Pasal 106 ayat (1) dipidana dengan pidana kurungan paling lama 3 (tiga) bulan atau denda paling banyak Rp750.000,00 (tujuh ratus lima puluh ribu rupiah).",
-        },
-        police: [examplePrincipal2],
-      },
-    ],
-    [
-      "iniuuid2",
-      {
-        status: { OnValidationProcess: null },
-        rewardAmount: BigInt(2000),
-        rewardPaidAt: [],
-        stakeAmount: BigInt(750),
-        submittedAt: [BigInt(Date.now())],
-        policeReportNumber: ["PR67890"],
-        licenseNumber: "XYZ789",
-        validatedAt: [],
-        reporter: examplePrincipal2,
-        violationType: {
-          chapter: BigInt(287),
-          clause: BigInt(1),
-          fine: BigInt(500000),
-          briefDescription: "Melanggar Marka Jalan",
-          completeDescription:
-            "Setiap orang yang mengemudikan Kendaraan Bermotor di Jalan yang melanggar aturan perintah atau larangan yang dinyatakan dengan Rambu Lalu Lintas sebagaimana dimaksud dalam Pasal 106 ayat (4) huruf a atau Marka Jalan sebagaimana dimaksud dalam Pasal 106 ayat (4) huruf b dipidana dengan pidana kurungan paling lama 2 (dua) bulan atau denda paling banyak Rp500.000,00 (lima ratus ribu rupiah).",
-        },
-        police: [examplePrincipal1],
-      },
-    ],
-    [
-      "iniuuid3",
-      {
-        status: { GuiltyWaitingForFineToBePaid: null },
-        rewardAmount: BigInt(2000),
-        rewardPaidAt: [],
-        stakeAmount: BigInt(750),
-        submittedAt: [BigInt(Date.now())],
-        policeReportNumber: ["PR67890"],
-        licenseNumber: "XYZ729",
-        validatedAt: [],
-        reporter: examplePrincipal2,
-        violationType: {
-          chapter: BigInt(287),
-          clause: BigInt(1),
-          fine: BigInt(500000),
-          briefDescription: "Melanggar Marka Jalan",
-          completeDescription:
-            "Setiap orang yang mengemudikan Kendaraan Bermotor di Jalan yang melanggar aturan perintah atau larangan yang dinyatakan dengan Rambu Lalu Lintas sebagaimana dimaksud dalam Pasal 106 ayat (4) huruf a atau Marka Jalan sebagaimana dimaksud dalam Pasal 106 ayat (4) huruf b dipidana dengan pidana kurungan paling lama 2 (dua) bulan atau denda paling banyak Rp500.000,00 (lima ratus ribu rupiah).",
-        },
-        police: [examplePrincipal1],
-      },
-    ],
-  ];
 
   const columns = useMemo<MRT_ColumnDef<UidReport>[]>(
     () => [
@@ -327,13 +253,15 @@ const listReport = () => {
 
   const userTable = useMantineReactTable({
     columns,
-    data: reports!,
+    data: reports,
     enablePagination: false,
     enableRowActions: true,
     renderRowActionMenuItems: ({ row }: { row: any }) => {
       return (
         <>
-          <Menu.Item onClick={() => openModalDetailUser({ detailDataArray: row.original })}>Detail</Menu.Item>
+          <Menu.Item onClick={() => openModalDetailUser({ detailDataArray: row.original })}>
+            Detail
+          </Menu.Item>
         </>
       );
     },
