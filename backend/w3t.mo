@@ -348,7 +348,7 @@ shared ({caller = _owner}) actor class W3T(
       if (Principal.isAnonymous(caller)) return #err(#userNotAuthorized);
       if (_getBalanceOf(caller) < amount) return #err(#notEnoughBalance);
       
-      _subtractBalance(amount);
+      _subtractBalance(caller, amount);
 
       let transferRes = await w3tToken.icrc1_transfer({
         from_subaccount = null;
@@ -365,7 +365,7 @@ shared ({caller = _owner}) actor class W3T(
         };
         case (#Err(_)) {
           // Re-add balance on failed withdraw
-          _addBalance(amount);
+          _addBalance(caller, amount);
             return #err(#withdrawFailed); // Return error message
         };
       };
