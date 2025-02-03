@@ -190,10 +190,12 @@ export function HeaderMegaMenu() {
           label="Amount"
           mb={"1rem"}
         />
-        <Box h={"1rem"} mb={"0.5rem"}>
-            { transactionInProgress && <Text>Deposit on process...</Text>}
-        </Box>
-          <Group justify="flex-end" mt={40}>
+          { transactionInProgress && 
+            <Box h={"1rem"} mb={"0.5rem"}>
+                <Text>Deposit on process...</Text>
+            </Box>
+          }
+          <Group justify="flex-end" mt={10}>
             <Button color={GREEN_PRIMARY} disabled={depositAmount === 0} onClick={async() => {
               if (depositAmount === 0) {
                 notifications.show({
@@ -246,10 +248,12 @@ export function HeaderMegaMenu() {
           label="Amount"
           mb={"1rem"}
         />
-        <Box h={"1rem"} mb={"0.5rem"}>
-            { transactionInProgress && <Text> Withdraw on process...</Text>}
-        </Box>
-        <Group justify="flex-end" mt={40}>
+        { transactionInProgress && 
+          <Box h={"1rem"} mb={"0.5rem"}>
+              <Text> Withdraw on process...</Text>
+          </Box>
+        }
+        <Group justify="flex-end" mt={10}>
             <Button color={GREEN_PRIMARY} disabled={withdrawAmount === 0} onClick={async() => {
               if (withdrawAmount === 0) {
                 notifications.show({
