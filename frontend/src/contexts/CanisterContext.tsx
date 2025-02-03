@@ -113,12 +113,9 @@ export const CanisterProvider = ({ children }: { children: ReactNode }) => {
         from_subaccount: [],
         created_at_time: [],
       }
-
-      const transferRes = await tokenActor.icrc1_transfer(args);
-      if("ok" in transferRes) {
-        await w3tActor.deposit(amount);
-        console.log("Deposit succeed:", transferRes.ok);
-      } else if("err" in transferRes) console.log("Failed to deposit token:", transferRes.err);
+      await tokenActor.icrc1_transfer(args);
+      await w3tActor.deposit(amount);
+      console.log("Deposit succeed");
     } catch (error) {
       console.log("Failed to deposit token:", error);
     }
