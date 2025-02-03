@@ -6,6 +6,7 @@ import { Principal } from "@dfinity/principal";
 interface CanisterContextType {
   principalId: string;
   role: string;
+  balance: BigInt;
   w3tActor: any;
   tokenActor: any;
   requestConnect: () => Promise<void>;
@@ -21,6 +22,7 @@ export const CanisterProvider = ({ children }: { children: ReactNode }) => {
   const [w3tActor, setW3tActor] = useState<any>(null);
   const [tokenActor, setTokenActor] = useState<any>(null);
   const [role, setRole] = useState("User");
+  const [balance, setBalance] = useState<BigInt>(BigInt(0));
   
   const w3tCanisterId = process.env.NEXT_PUBLIC_W3T_CANISTER_ID ?? "";
   const w3tTokenCanisterId = process.env.NEXT_PUBLIC_W3T_TOKEN_CANISTER_ID ?? "";
@@ -28,6 +30,7 @@ export const CanisterProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if(w3tActor !== null) {
       initRole();
+      fetchBalance();
     }
   }, [w3tActor]);
 
@@ -119,6 +122,8 @@ export const CanisterProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       console.log("Failed to deposit token:", error);
     }
+
+    fetchBalance();
   }
 
   const withdrawToken = async (amount: number) => {
@@ -129,9 +134,23 @@ export const CanisterProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       console.log("Failed to withdraw token:", error);
     }
+
+    fetchBalance();
   }
 
-  return <CanisterContext.Provider value={{ principalId, role, w3tActor, tokenActor, requestConnect, disconnect, depositToken, withdrawToken }}>{children}</CanisterContext.Provider>;
+  const fetchBalance = async () => {
+    const response = await w3tActor.getMyBalance();
+      if ("err" in response) {
+        if ("userNotAuthorized" in response.err) console.log("User Not Authorized");
+        else console.log("Error fetching Report");
+      }
+      
+      console.log(response);
+      const balances: any = "ok" in response ? response.ok : 0;
+      setBalance(balances)
+  };
+
+  return <CanisterContext.Provider value={{ principalId, role, balance, w3tActor, tokenActor, requestConnect, disconnect, depositToken, withdrawToken }}>{children}</CanisterContext.Provider>;
 };
 
 export const useCanister = () => {
