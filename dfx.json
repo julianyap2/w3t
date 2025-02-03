@@ -14,17 +14,6 @@
       "source": ["frontend/build"],
       "type": "assets"
     },
-    "internet-identity": {
-      "type": "custom",
-      "candid": "https://github.com/dfinity/internet-identity/releases/download/release-2023-09-08/internet_identity.did",
-      "wasm": "https://github.com/dfinity/internet-identity/releases/download/release-2023-09-08/internet_identity_dev.wasm.gz",
-      "frontend": {},
-      "remote": {
-        "id": {
-          "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
-        }
-      }
-    },
     "w3t_token": {
       "type": "custom",
       "candid": "https://raw.githubusercontent.com/dfinity/ic/4ba583480e05a518aa2bcf36f5a0e48475e8edc2/rs/ledger_suite/icrc1/ledger/ledger.did",

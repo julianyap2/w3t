@@ -93,23 +93,6 @@ const ReportFormDialog = () => {
     };
   };
 
-  // async function reconstructVideo(fileId) {
-  //   const chunks = await fetchVideoChunks(fileId);
-    
-  //   if (chunks.length === 0) {
-  //       console.error("No video chunks found.");
-  //       return null;
-  //   }
-
-  //   // Merge chunks into a single Blob
-  //   const mergedBlob = new Blob(chunks, { type: "video/mp4" });
-
-  //   // Create a URL for the Blob
-  //   const videoURL = URL.createObjectURL(mergedBlob);
-
-  //   return videoURL;
-  // }
-
     const handleSubmit = async (values: typeof reportForm.values) => {
         setIsSubmitting(true);
         if(reportForm.values.video){
