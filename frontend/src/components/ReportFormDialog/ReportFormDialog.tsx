@@ -1,4 +1,4 @@
-import { Box, Button, FileInput, Select, TextInput } from "@mantine/core";
+import { Box, Button, FileInput, Grid, Select, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useEffect, useState } from "react";
 import { GREEN_PRIMARY } from "@app/constants/colors";
@@ -8,14 +8,8 @@ import { Principal } from '@dfinity/principal';
 import { ViolationType, Report } from "@app/declarations/w3t/w3t.did";
 import { useCanister } from "@app/contexts/CanisterContext";
 
-interface ReportFormDialogProps {
-    w3tActor: any;
-}
-
 const ReportFormDialog = () => {    
-      const { principalId, w3tActor } = useCanister();
-    
-    const [loadingUpload, setLoadingUpload] = useState<boolean>(false);
+    const { principalId, w3tActor } = useCanister();
     const [violationTypeStringArray, setViolationTypeStringArray] = useState<string[]>();
     const [violationTypeArray, setViolationTypeArray] = useState<ViolationType[]>();
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -45,86 +39,89 @@ const ReportFormDialog = () => {
         setViolationTypeArray(violations);
     }
     
-  const [video, setVideo] = useState<File>();
-  const handleVideo = (vids : File) => {
-    if (vids) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        console.log("File content:", e.target?.result);
-      };
-      console.log(`Typeof: ${typeof vids}`);
-      console.log(`Video: ${vids}`)
-      setVideo(vids);
-    } else {
-        console.log("Video is empty");
-    }
-  };
+    let video: File;
 
-  const uploadFile = async (uid: any) => {
-    setLoadingUpload(true)
-    const CHUNK_SIZE = 200000; // 0.2MB
-    
-    const reader = new FileReader();
-    video?.arrayBuffer().then((arrayBuffer) => {
-        const blob = new Blob([new Uint8Array(arrayBuffer)], {type: video.type });
-        reader.readAsArrayBuffer(blob);
-        console.log(`Successfully read: ${blob}`);
-    });
-    reader.onload = async () => {
-      const fileBytes = new Uint8Array(reader.result as ArrayBuffer);
-      const fileSize: number = fileBytes.length;
-      const totalChunks: number = Math.ceil(fileSize / CHUNK_SIZE);
-
-      for (let i = 0; i < totalChunks; i++) {
-        const offset: number = i * CHUNK_SIZE;
-        const chunk: Uint8Array = new Uint8Array(fileBytes.slice(offset, offset + CHUNK_SIZE));
-        const hexChunk: string = Array.from(chunk).map(byte => `0x${byte.toString(16).padStart(2, "0")}`).join(";");
-        
-        console.log(`Uploading chunk ${i + 1}/${totalChunks}...`);
-        
-        const response = await w3tActor.uploadVideoByChunk(uid, chunk);
-        if("err" in response) break;
-        const success = "ok" in response? response.ok : undefined;
-        console.log(`Success upload chunk: ${i}, ${success}`)
-      }
-  
-      console.log("Video successfully uploaded!");
-      setLoadingUpload(false)
+    const handleVideo = async (vids : File) => {
+        if (vids) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            console.log("File content:", e.target?.result);
+        };
+        console.log(`Typeof: ${typeof vids}`);
+        console.log(`Video: ${vids}`)
+        video = vids;
+        } else {
+            console.log("Video is empty");
+        }
     };
-  };
+
+    const uploadFile = async (uid: any) => {
+        const CHUNK_SIZE = 200000; // 0.2MB
+        
+        const reader = new FileReader();
+        video?.arrayBuffer().then((arrayBuffer) => {
+            const blob = new Blob([new Uint8Array(arrayBuffer)], {type: video.type });
+            reader.readAsArrayBuffer(blob);
+            console.log(`Successfully read: ${blob}`);
+        });
+        reader.onload = async () => {
+            const fileBytes = new Uint8Array(reader.result as ArrayBuffer);
+            const fileSize: number = fileBytes.length;
+            const totalChunks: number = Math.ceil(fileSize / CHUNK_SIZE);
+
+            for (let i = 0; i < totalChunks; i++) {
+                const offset: number = i * CHUNK_SIZE;
+                const chunk: Uint8Array = new Uint8Array(fileBytes.slice(offset, offset + CHUNK_SIZE));
+                const hexChunk: string = Array.from(chunk).map(byte => `0x${byte.toString(16).padStart(2, "0")}`).join(";");
+                
+                console.log(`Uploading chunk ${i + 1}/${totalChunks}...`);
+                
+                const response = await w3tActor.uploadVideoByChunk(uid, chunk);
+                if("err" in response) break;
+                const success = "ok" in response? response.ok : undefined;
+                console.log(`Success upload chunk: ${i}, ${success}`)
+            }
+        
+            console.log("Video successfully uploaded!");
+            reportForm.reset();
+            notifications.show({
+                title: "Success!",
+                message: "Report Submitted!",
+                color: "green",
+                icon: <IconCheck/>
+            })
+            setIsSubmitting(false)
+        };
+    };
 
     const handleSubmit = async (values: typeof reportForm.values) => {
         setIsSubmitting(true);
         if(reportForm.values.video){
             try {
-                handleVideo(reportForm.values.video)
-                const violationTypeIndex = violationTypeArray?.find((x) => reportForm.values.violationType == x.briefDescription)!;
+                await handleVideo(reportForm.values.video)
+                const violationType = violationTypeArray?.find((x) => reportForm.values.violationType == x.briefDescription)!;
+                const stakeAmount = BigInt(getStakeAmount());
+                const rewardAmount = BigInt(getRewardAmount());
+                const submittedAt: [bigint] = [BigInt(Date.now())];
                 let report: Report = {
                     "status": {
                         "OnValidationProcess": null
                     },
-                    "rewardAmount": BigInt(0),
+                    "rewardAmount": rewardAmount,
                     "rewardPaidAt": [],
-                    "stakeAmount": BigInt(0),
-                    "submittedAt": [],
-                    "policeReportNumber": [""],
+                    "stakeAmount": stakeAmount,
+                    "submittedAt": submittedAt,
+                    "policeReportNumber": [],
                     "licenseNumber": reportForm.values.licenseNumber,
                     "validatedAt": [],
                     "reporter": Principal.fromText(principalId),
-                    "violationType": violationTypeIndex,
+                    "violationType": violationType,
                     "police": [],
                 }
                 const res = await w3tActor.submitReport(report);
                 const response: string = "ok" in res ? res.ok : "";
+
                 await uploadFile(response)
-                
-                reportForm.reset();
-                notifications.show({
-                    title: "Success!",
-                    message: "Report Submitted!",
-                    color: "green",
-                    icon: <IconCheck/>
-                })
                 
             } catch (error: any) {
                 notifications.show({
@@ -133,9 +130,26 @@ const ReportFormDialog = () => {
                     color: "red",
                     icon: <IconX/>
                 })
+                setIsSubmitting(false)
             }
-            setIsSubmitting(false)
         }
+    }
+
+    const getStakeAmount = () => {
+        const violationType = violationTypeArray?.find((x) => reportForm.values.violationType == x.briefDescription)!;
+        if(!violationType) return 0;
+        return (Number(violationType.fine));
+    }
+
+    const getRewardAmount = () => {
+        const violationType = violationTypeArray?.find((x) => reportForm.values.violationType == x.briefDescription)!;
+        if(!violationType) return 0;
+        return (Number(violationType.fine) / 2);
+    }
+
+    const formatTokenDecimal = (num: number) => {
+        if(num === 0) return "-";
+        return (num / 100000000).toFixed(8);
     }
 
     return (
@@ -158,6 +172,24 @@ const ReportFormDialog = () => {
                     accept="video/*"
                     {...reportForm.getInputProps("video")}
                 />
+                <Grid mt={"1rem"}>
+                    <Grid.Col span={{base: 6}}>
+                        <Box>
+                            Stake Amount
+                        </Box>
+                        <Box style={{color: "#888888", fontWeight: "500"}}>
+                            {formatTokenDecimal(getStakeAmount()) + " W3T"}
+                        </Box>
+                    </Grid.Col>
+                    <Grid.Col span={{base: 6}}>
+                        <Box>
+                            Reward Amount
+                        </Box>
+                        <Box  style={{color: "#888888", fontWeight: "500"}}>
+                            {formatTokenDecimal(getRewardAmount()) + " W3T"}
+                        </Box>
+                    </Grid.Col>
+                </Grid>
                 <Box style={{height: 50, display: "flex", alignItems: "flex-end", justifyContent: "center"}}>
                     { isSubmitting && "⚠️ Please do not close this page while submitting..."}
                 </Box>
