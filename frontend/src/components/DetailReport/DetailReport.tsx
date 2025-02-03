@@ -78,6 +78,10 @@ const DetailReport = ({ detailDataArray }: { detailDataArray: UidReport }) => {
     fetchVideoChunks(detailDataArray[0]);
   }, []);
 
+  const formatTokenDecimal = (num: number) => {
+    if(num === 0) return "-";
+    return (num / 100000000).toFixed(8);
+  }
 
   return (
     <Box>
@@ -95,9 +99,9 @@ const DetailReport = ({ detailDataArray }: { detailDataArray: UidReport }) => {
         <Grid.Col span={{ base: 12, xs: 6 }}>Reporter</Grid.Col>
         <Grid.Col span={{ base: 12, xs: 6 }}>{detailData.reporter && `${detailData.reporter}`}</Grid.Col>
         <Grid.Col span={{ base: 12, xs: 6 }}>Stake Amount</Grid.Col>
-        <Grid.Col span={{ base: 12, xs: 6 }}>{detailData.stakeAmount}</Grid.Col>
+        <Grid.Col span={{ base: 12, xs: 6 }}>{formatTokenDecimal(Number(detailData.stakeAmount)) + " W3T"}</Grid.Col>
         <Grid.Col span={{ base: 12, xs: 6 }}>Reward Amount</Grid.Col>
-        <Grid.Col span={{ base: 12, xs: 6 }}>{detailData.rewardAmount}</Grid.Col>
+        <Grid.Col span={{ base: 12, xs: 6 }}>{formatTokenDecimal(Number(detailData.rewardAmount)) + " W3T"}</Grid.Col>
         <Grid.Col span={{ base: 12, xs: 6 }}>Reward Paid At</Grid.Col>
         <Grid.Col span={{ base: 12, xs: 6 }}>
           {detailData.rewardPaidAt?.length > 0

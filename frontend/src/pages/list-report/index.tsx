@@ -62,7 +62,7 @@ const listReport = () => {
   
       const approveFunc = async({uuid} : {uuid: string}) => {
         try {
-          const response = await w3tActor.validateReportStatus([uuid, { "GuiltyWaitingForFineToBePaid" : null}, [policeReportNumbers]]);
+          const response = await w3tActor.validateReportStatus(uuid, { "GuiltyWaitingForFineToBePaid" : null}, [policeReportNumbers] as [string]);
           modals.closeAll();
         } catch (error: any) {
           notifications.show({
@@ -233,6 +233,10 @@ const listReport = () => {
     ],
     []
   );
+  const formatTokenDecimal = (num: number) => {
+    if(num === 0) return "-";
+    return (num / 100000000).toFixed(8);
+  }
 
   const policeTable = useMantineReactTable({
     columns,
