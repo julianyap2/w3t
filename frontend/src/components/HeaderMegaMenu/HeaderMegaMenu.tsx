@@ -34,6 +34,7 @@ import {
   IconCode,
   IconCoin,
   IconCoins,
+  IconCoinFilled,
   IconFingerprint,
   IconLogout2,
   IconNotification,
@@ -83,10 +84,11 @@ const mockdata = [
 ];
 
 export function HeaderMegaMenu() {
-  const { requestConnect, disconnect, principalId, w3tActor } = useCanister();
+  const { requestConnect, disconnect, principalId, balance, w3tActor, depositToken, withdrawToken } = useCanister();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [amount, setAmount] = useState<string | number>(0);
-  const [balance, setBalance] = useState<BigInt>(BigInt(0));
+  const [depositAmount, setDepositAmount] = useState<string | number>(0);
+  const [withdrawAmount, setWithdrawAmount] = useState<string | number>(0);
+  const [transactionInProgress, setTransactionInProgress] = useState(false);
   const theme = useMantineTheme();
   const router = useRouter();
   const links = mockdata.map((item) => (
@@ -168,24 +170,68 @@ export function HeaderMegaMenu() {
     title: "Deposit",
     children: (
       <>
-        <Text>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        <Text mb={"1rem"}>
+          To participate in reporting traffic violations and earn rewards, you first need to deposit your tokens into your account to be staked.
         </Text>
         <NumberInput 
-          value={amount} 
-          onChange={setAmount} 
+          value={depositAmount} 
+          onChange={setDepositAmount} 
           min={0}
           hideControls
           label="Amount"
-          mb={40}
+          mb={"1rem"}
         />
+        <Box h={"1rem"} mb={"0.5rem"}>
+            { transactionInProgress && <Text>Deposit on process...</Text>}
+        </Box>
       </>
     ),
     labels: {confirm: "Deposit", cancel: "Cancel"},
     confirmProps: { fullWidth: true, color: GREEN_PRIMARY },
     cancelProps: { display: "none" },
+    closeOnConfirm: false,
     onConfirm: async () => {
-      alert("function Deposit")
+      // const _amount = depositAmount as number;
+      // if(_amount > 0) depositToken(_amount);
+      setTransactionInProgress(true);
+      await depositToken(depositAmount as number);
+      setDepositAmount(0);
+      setTransactionInProgress(false);
+      modals.closeAll();
+    },
+    centered: true,
+  })
+
+  const openModalWithdraw = () => modals.openConfirmModal({
+    title: "Withdraw",
+    children: (
+      <>
+        <NumberInput 
+          value={withdrawAmount} 
+          onChange={setWithdrawAmount} 
+          min={0}
+          hideControls
+          label="Amount"
+          mb={"1rem"}
+        />
+        <Box h={"1rem"} mb={"0.5rem"}>
+            { transactionInProgress && <Text> Withdraw on process...</Text>}
+        </Box>
+      </>
+    ),
+    
+    labels: {confirm: "Withdraw", cancel: "Cancel"},
+    confirmProps: { fullWidth: true, color: GREEN_PRIMARY },
+    cancelProps: { display: "none" },
+    closeOnConfirm: false,
+    onConfirm: async () => {
+      // const _amount = withdrawAmount as number;
+      // if(_amount > 0) withdrawToken(_amount);
+      setTransactionInProgress(true);
+      await withdrawToken(withdrawAmount as number);
+      setWithdrawAmount(0);
+      setTransactionInProgress(false);
+      modals.closeAll();
     },
     centered: true,
   })
@@ -213,34 +259,10 @@ export function HeaderMegaMenu() {
     }
   };
 
-  const fetchBalance = async() => {
-    try {
-      const response = await w3tActor.getMyBalance();
-      if ("err" in response) {
-        if ("userNotAuthorized" in response.err) console.log("User Not Authorized");
-        else console.log("Error fetching Report");
-      }
-
-      const balances: any = "ok" in response ? response.ok : undefined;
-      setBalance(balances)
-    } catch (error: any) {
-      notifications.show({
-        title: "Error!",
-        message: error,
-        color: "red",
-        icon: <IconX />
-      })
-      
-    }
+  const tokenBalanceFormat = (balance: BigInt): string => {
+    return (Number(balance) / 100000000).toFixed(8); 
   }
-
-  useEffect(() => {
-    if(w3tActor){
-      fetchBalance()
-    }
-  }, [])
   
-
   return (
     <Box
       style={{
@@ -276,7 +298,7 @@ export function HeaderMegaMenu() {
               </Button>
             ) : (
               <Menu
-                width={260}
+                width={300}
                 position="bottom-end"
                 transitionProps={{ transition: "pop-top-right" }}
                 onClose={() => setMenuOpen(false)}
@@ -294,7 +316,7 @@ export function HeaderMegaMenu() {
                       <Text ta={"center"}>My W3T</Text>
                       <Group gap={6} justify="center">
                         <Text fw={500} fz={"2rem"} lh={1} mr={13}>
-                          {balance != BigInt(0) ? Number(balance) : 0}
+                          {tokenBalanceFormat(balance)}
                         </Text>
                         <Avatar src={"/token.png"} alt="w3t-icon" radius={"xl"} size={40} />
                       </Group>
@@ -305,6 +327,10 @@ export function HeaderMegaMenu() {
                     leftSection={<IconCoins size={16} stroke={1.5} />}
                     onClick={openModalDeposit}
                   >Deposit</Menu.Item>
+                   <Menu.Item 
+                    leftSection={<IconCoinFilled size={16} stroke={1.5} />}
+                    onClick={openModalWithdraw}
+                  >Withdraw</Menu.Item>
                   <Menu.Item
                     leftSection={<IconLogout2 size={16} stroke={1.5} />}
                     onClick={disconnect}
