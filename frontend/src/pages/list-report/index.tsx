@@ -62,7 +62,7 @@ const listReport = () => {
   
       const approveFunc = async({uuid} : {uuid: string}) => {
         try {
-          const response = await w3tActor.validateReportStatus([uuid, { "GuiltyWaitingForFineToBePaid" : null}, []]);
+          const response = await w3tActor.validateReportStatus([uuid, { "GuiltyWaitingForFineToBePaid" : null}, [policeReportNumbers]]);
           modals.closeAll();
         } catch (error: any) {
           notifications.show({
@@ -190,17 +190,17 @@ const listReport = () => {
         },
       },
       {
-        accessorKey: "1.violationType",
+        accessorKey: "1.violationType.briefDescription",
         header: "Violation Type",
-        Cell: ({ renderedCellValue, row }: { renderedCellValue: any; row: any }) => {
-          if ("LLAJ222009_283" in renderedCellValue) {
-            return <Box color="green">LLAJ222009_283</Box>;
-          } else if ("LLAJ222009_287" in renderedCellValue) {
-            return <Box color="orange">LLAJ222009_287</Box>;
-          } else {
-            return <Box color="gray">LLAJ222009_291</Box>;
-          }
-        },
+        // Cell: ({ renderedCellValue, row }: { renderedCellValue: any; row: any }) => {
+        //   if ("LLAJ222009_283" in renderedCellValue) {
+        //     return <Box color="green">LLAJ222009_283</Box>;
+        //   } else if ("LLAJ222009_287" in renderedCellValue) {
+        //     return <Box color="orange">LLAJ222009_287</Box>;
+        //   } else {
+        //     return <Box color="gray">LLAJ222009_291</Box>;
+        //   }
+        // },
       },
       {
         accessorKey: "1.submittedAt",

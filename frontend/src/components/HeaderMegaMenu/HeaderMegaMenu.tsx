@@ -86,9 +86,6 @@ const mockdata = [
 export function HeaderMegaMenu() {
   const { requestConnect, disconnect, principalId, balance, w3tActor, depositToken, withdrawToken } = useCanister();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [depositAmount, setDepositAmount] = useState<string | number>(0);
-  const [withdrawAmount, setWithdrawAmount] = useState<string | number>(0);
-  const [transactionInProgress, setTransactionInProgress] = useState(false);
   const theme = useMantineTheme();
   const router = useRouter();
   const links = mockdata.map((item) => (
@@ -166,10 +163,22 @@ export function HeaderMegaMenu() {
     }
   };
 
-  const openModalDeposit = () => modals.openConfirmModal({
-    title: "Deposit",
-    children: (
-      <>
+  const DepositModal = () => {
+    const [depositAmount, setDepositAmount] = useState<string | number>(0);
+    const [transactionInProgress, setTransactionInProgress] = useState(false);
+
+    const depositAsync = async() => {
+      // const _amount = depositAmount as number;
+      // if(_amount > 0) depositToken(_amount);
+      setTransactionInProgress(true);
+      await depositToken(depositAmount as number);
+      setDepositAmount(0);
+      setTransactionInProgress(false);
+      modals.closeAll();
+    }
+
+    return( 
+      <Stack>
         <Text mb={"1rem"}>
           To participate in reporting traffic violations and earn rewards, you first need to deposit your tokens into your account to be staked.
         </Text>
@@ -184,28 +193,51 @@ export function HeaderMegaMenu() {
         <Box h={"1rem"} mb={"0.5rem"}>
             { transactionInProgress && <Text>Deposit on process...</Text>}
         </Box>
-      </>
-    ),
+          <Group justify="flex-end" mt={40}>
+            <Button color={GREEN_PRIMARY} disabled={depositAmount === 0} onClick={async() => {
+              if (depositAmount === 0) {
+                notifications.show({
+                  title: "Error!",
+                  message: "Please Fill Amount Number!",
+                  color: "red",
+                  icon: <IconX />
+                });
+              } else {
+                await depositAsync()
+              }
+            }}>Deposit</Button>
+
+          </Group>
+      </Stack>
+    )
+  }
+
+  const openModalDeposit = () => modals.openConfirmModal({
+    title: "Deposit",
+    children: <DepositModal />,
     labels: {confirm: "Deposit", cancel: "Cancel"},
-    confirmProps: depositAmount === 0 ? { fullWidth: true, color: GREEN_PRIMARY, disabled: true } : { fullWidth: true, color: GREEN_PRIMARY },
+    confirmProps: { display: "none", fullWidth: true, color: GREEN_PRIMARY },
     cancelProps: { display: "none" },
     closeOnConfirm: false,
-    onConfirm: async () => {
-      // const _amount = depositAmount as number;
-      // if(_amount > 0) depositToken(_amount);
-      setTransactionInProgress(true);
-      await depositToken(depositAmount as number);
-      setDepositAmount(0);
-      setTransactionInProgress(false);
-      modals.closeAll();
-    },
     centered: true,
   })
 
-  const openModalWithdraw = () => modals.openConfirmModal({
-    title: "Withdraw",
-    children: (
-      <>
+  const WithdrawModal = () => {
+    const [transactionInProgress, setTransactionInProgress] = useState(false);
+    const [withdrawAmount, setWithdrawAmount] = useState<string | number>(0);
+
+    const withdrawAsync = async() => {
+      // const _amount = withdrawAmount as number;
+      // if(_amount > 0) withdrawToken(_amount);
+      setTransactionInProgress(true);
+      await withdrawToken(withdrawAmount as number);
+      setWithdrawAmount(0);
+      setTransactionInProgress(false);
+      modals.closeAll();
+    }
+
+    return(
+      <Stack>
         <NumberInput 
           value={withdrawAmount} 
           onChange={setWithdrawAmount} 
@@ -217,22 +249,35 @@ export function HeaderMegaMenu() {
         <Box h={"1rem"} mb={"0.5rem"}>
             { transactionInProgress && <Text> Withdraw on process...</Text>}
         </Box>
-      </>
+        <Group justify="flex-end" mt={40}>
+            <Button color={GREEN_PRIMARY} disabled={withdrawAmount === 0} onClick={async() => {
+              if (withdrawAmount === 0) {
+                notifications.show({
+                  title: "Error!",
+                  message: "Please Fill Amount Number!",
+                  color: "red",
+                  icon: <IconX />
+                });
+              } else {
+                await withdrawAsync()
+              }
+            }}>Withdraw</Button>
+
+          </Group>
+      </Stack>
+    )
+  }
+
+
+  const openModalWithdraw = () => modals.openConfirmModal({
+    title: "Withdraw",
+    children: (
+      <WithdrawModal/>
     ),
-    
     labels: {confirm: "Withdraw", cancel: "Cancel"},
-    confirmProps: withdrawAmount === 0 ? { disabled: true, fullWidth: true, color: GREEN_PRIMARY } :{ fullWidth: true, color: GREEN_PRIMARY },
+    confirmProps: { display: "none", fullWidth: true, color: GREEN_PRIMARY },
     cancelProps: { display: "none" },
     closeOnConfirm: false,
-    onConfirm: async () => {
-      // const _amount = withdrawAmount as number;
-      // if(_amount > 0) withdrawToken(_amount);
-      setTransactionInProgress(true);
-      await withdrawToken(withdrawAmount as number);
-      setWithdrawAmount(0);
-      setTransactionInProgress(false);
-      modals.closeAll();
-    },
     centered: true,
   })
 
