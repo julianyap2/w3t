@@ -107,14 +107,14 @@ export const CanisterProvider = ({ children }: { children: ReactNode }) => {
           owner: Principal.fromText(w3tCanisterId),
           subaccount: [],
         },
-        amount: BigInt(amount),
+        amount: BigInt(amount * 100000000),
         fee: [],
         memo: [],
         from_subaccount: [],
         created_at_time: [],
       }
       await tokenActor.icrc1_transfer(args);
-      await w3tActor.deposit(amount);
+      await w3tActor.deposit(amount * 100000000);
       console.log("Deposit succeed");
     } catch (error) {
       console.log("Failed to deposit token:", error);
@@ -125,7 +125,7 @@ export const CanisterProvider = ({ children }: { children: ReactNode }) => {
 
   const withdrawToken = async (amount: number) => {
     try {
-      const transferRes = await w3tActor.withdrawToken(amount);
+      const transferRes = await w3tActor.withdrawToken(amount * 100000000);
       if("ok" in transferRes) console.log("Withdraw succeed:", transferRes.ok);
       else if('err' in transferRes) console.log("Failed to withdraw token:", transferRes.err);
     } catch (error) {
