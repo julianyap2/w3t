@@ -347,6 +347,8 @@ shared ({caller = _owner}) actor class W3T(
     public shared ({caller}) func withdrawToken(amount: Nat) : async NatResponse {
       if (Principal.isAnonymous(caller)) return #err(#userNotAuthorized);
       if (_getBalanceOf(caller) < amount) return #err(#notEnoughBalance);
+      
+      _subtractBalance(amount);
 
       let transferRes = await w3tToken.icrc1_transfer({
         from_subaccount = null;
@@ -362,6 +364,8 @@ shared ({caller = _owner}) actor class W3T(
             return #ok(block_height); // Return the block height if successful
         };
         case (#Err(_)) {
+          // Re-add balance on failed withdraw
+          _addBalance(amount);
             return #err(#withdrawFailed); // Return error message
         };
       };
