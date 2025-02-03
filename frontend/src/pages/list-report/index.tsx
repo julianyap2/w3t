@@ -60,6 +60,19 @@ const listReport = () => {
     const PoliceReportModal = ({uuid} : {uuid: string}) => {
       const [policeReportNumbers, setPoliceReportNumbers] = useState('');
   
+      const approveFunc = async({uuid} : {uuid: string}) => {
+        try {
+          const response = await w3tActor.validateReportStatus([uuid, { "GuiltyWaitingForFineToBePaid" : null}, []]);
+          modals.closeAll();
+        } catch (error: any) {
+          notifications.show({
+            title: "Error!",
+            message: error,
+            color: "red",
+            icon: <IconX />
+          })
+        }
+      }
       return (
         <Stack>
           <TextInput 
@@ -71,7 +84,7 @@ const listReport = () => {
             withAsterisk 
           />
           <Group justify="flex-end" mt={40}>
-            <Button color={GREEN_PRIMARY} onClick={() => {
+            <Button color={GREEN_PRIMARY} onClick={async() => {
               if (policeReportNumbers === "") {
                 notifications.show({
                   title: "Error!",
@@ -80,7 +93,7 @@ const listReport = () => {
                   icon: <IconX />
                 });
               } else {
-                approveFunc({uuid: uuid})
+                await approveFunc({uuid: uuid})
               }
             }}>Approve</Button>
 
@@ -89,22 +102,9 @@ const listReport = () => {
       );
     };
 
-    const approveFunc = async({uuid} : {uuid: string}) => {
-      try {
-        const response = await w3tActor.validateReportStatus([uuid, { "GuiltyWaitingForFineToBePaid" : null}]);
-        modals.closeAll();
-      } catch (error: any) {
-        notifications.show({
-          title: "Error!",
-          message: error,
-          color: "red",
-          icon: <IconX />
-        })
-      }
-    }
     const rejectFunc = async({uuid} : {uuid: string}) => {
       try {
-        const response = await w3tActor.validateReportStatus([uuid, { "NotGuilty" : null}]);
+        const response = await w3tActor.validateReportStatus([uuid, { "NotGuilty" : null}, []]);
         modals.closeAll();
       } catch (error: any) {
         notifications.show({
@@ -236,7 +236,7 @@ const listReport = () => {
 
   const policeTable = useMantineReactTable({
     columns,
-    data: reports,
+    data: reports!,
     enablePagination: false,
     enableRowActions: true,
     renderRowActionMenuItems: ({ row }: { row: any }) => {
