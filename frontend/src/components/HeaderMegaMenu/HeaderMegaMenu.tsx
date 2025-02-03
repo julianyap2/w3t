@@ -83,7 +83,7 @@ const mockdata = [
 ];
 
 export function HeaderMegaMenu() {
-  const { requestConnect, principalId, w3tActor } = useCanister();
+  const { requestConnect, disconnect, principalId, w3tActor } = useCanister();
   const [menuOpen, setMenuOpen] = useState(false);
   const [amount, setAmount] = useState<string | number>(0);
   const [balance, setBalance] = useState<BigInt>(BigInt(0));
@@ -305,8 +305,10 @@ export function HeaderMegaMenu() {
                     leftSection={<IconCoins size={16} stroke={1.5} />}
                     onClick={openModalDeposit}
                   >Deposit</Menu.Item>
-                  <Menu.Item leftSection={<IconCashBanknote size={16} stroke={1.5} />}>Withdraw</Menu.Item>
-                  <Menu.Item leftSection={<IconLogout2 size={16} stroke={1.5} />}>Disconnect</Menu.Item>
+                  <Menu.Item
+                    leftSection={<IconLogout2 size={16} stroke={1.5} />}
+                    onClick={disconnect}
+                  >Disconnect</Menu.Item>
                 </Menu.Dropdown>
               </Menu>
             )}
