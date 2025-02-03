@@ -90,7 +90,7 @@ export default function HomePage() {
     labels: { confirm: 'Connect', cancel: 'Cancel' },
     confirmProps: { fullWidth: true, color: GREEN_PRIMARY },
     cancelProps: { display: "none" },
-    onConfirm: async () => checkConnect,
+    onConfirm: async () => checkConnect(),
     centered: true,
   })
   
