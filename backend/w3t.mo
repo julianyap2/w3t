@@ -200,6 +200,39 @@ shared ({caller = _owner}) actor class W3T(
       return #ok(uuidText);
     };
 
+    public shared ({caller}) func distributeReward(uid: Text): async TextResponse {
+      if (Principal.isAnonymous(caller) or (getRole(caller) != #Police)) return #err(#userNotAuthorized);
+      let report = switch(Map.get(reports, Map.thash, uid)) {
+        case(?_report) {
+          _report;
+        };
+        case null { return #err(#keyNotFound); };
+      };
+
+      if (_getBalanceOf(caller) < report.stakeAmount) return #err(#notEnoughBalance);
+      
+      _subtractBalance(caller, report.stakeAmount);
+      _addBalance(report.reporter, report.rewardAmount);
+      _addBalance(Principal.fromActor(this), report.stakeAmount - report.rewardAmount);
+
+      let updateReport: Report = {
+            reporter = report.reporter;
+            police = report.police;
+            violationType = report.violationType;
+            status = #GuiltyFinePaid;
+            licenseNumber = report.licenseNumber;
+            policeReportNumber = report.policeReportNumber;
+            stakeAmount = report.stakeAmount;
+            rewardAmount = report.rewardAmount;
+            submittedAt = report.submittedAt;
+            validatedAt = report.validatedAt;
+            rewardPaidAt =  ?Time.now();
+      };
+      Map.set(reports, Map.thash, uid, updateReport);
+
+      #ok("Successfully distribute reward");
+    };
+
     // ==============================================================================================================================
 
     public shared ({caller}) func uploadVideoByChunk(uid: Text, chunk: Blob) : async TextResponse {
@@ -268,28 +301,6 @@ shared ({caller = _owner}) actor class W3T(
     // ==============================================================================================================================
 
     type NatResponse = Result.Result<Nat, GeneralError>;
-    public shared ({caller}) func withdrawToken(amount: Nat) : async NatResponse {
-      if (Principal.isAnonymous(caller)) return #err(#userNotAuthorized);
-      if (_getBalanceOf(caller) < amount) return #err(#notEnoughBalance);
-
-      let transferRes = await w3tToken.icrc1_transfer({
-        from_subaccount = null;
-        to = { owner = caller; subaccount = null };
-        amount = amount;
-        fee = null;
-        memo = null;
-        created_at_time = null;
-      });
-
-      switch (transferRes) {
-        case (#Ok(block_height)) {
-            return #ok(block_height); // Return the block height if successful
-        };
-        case (#Err(_)) {
-            return #err(#withdrawFailed); // Return error message
-        };
-      };
-    };
 
     public func checkTokenConnection () : async TextResponse {
       try {
@@ -331,5 +342,32 @@ shared ({caller = _owner}) actor class W3T(
       if (Principal.isAnonymous(caller)) return #err(#userNotAuthorized);
       _addBalance(caller, amount);
       #ok(0);
+    };
+
+    public shared ({caller}) func withdrawToken(amount: Nat) : async NatResponse {
+      if (Principal.isAnonymous(caller)) return #err(#userNotAuthorized);
+      if (_getBalanceOf(caller) < amount) return #err(#notEnoughBalance);
+      
+      _subtractBalance(caller, amount);
+
+      let transferRes = await w3tToken.icrc1_transfer({
+        from_subaccount = null;
+        to = { owner = caller; subaccount = null };
+        amount = amount;
+        fee = null;
+        memo = null;
+        created_at_time = null;
+      });
+
+      switch (transferRes) {
+        case (#Ok(block_height)) {
+            return #ok(block_height); // Return the block height if successful
+        };
+        case (#Err(_)) {
+          // Re-add balance on failed withdraw
+          _addBalance(caller, amount);
+            return #err(#withdrawFailed); // Return error message
+        };
+      };
     };
 }
