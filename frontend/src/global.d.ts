@@ -1,6 +1,6 @@
 export interface Plug {
     principalId: string;
-    requestConnect: (args: {whitelist?: [string], host?: string}) => Promise<boolean>;
+    requestConnect: (args: {whitelist?: string[], host?: string}) => Promise<boolean>;
     isConnected: () => Promise<boolean>;
     disconnect: () => Promise<void>;
     createActor: <T>(options: {
@@ -19,7 +19,7 @@ export interface Plug {
                 timestamp_nanos: number;
             };
         };
-    }) => Promise<{ height: number }>;
+    }) => Promise<any>;
     agent: {
         getPrincipal: () => Promise<import("@dfinity/principal").Principal>;
     };  
