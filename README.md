@@ -43,7 +43,7 @@ This ensures a **self-sustaining cycle** of community participation and law enfo
 
 We have deployed our **canisters on the main IC network**. Feel free to explore our dApp:  
 
-🔹 **Frontend:** [Visit dApp](#) *(Link Placeholder – Add your actual link here)*  
+🔹 **Frontend:** Please run `dfx deploy frontend --playground` and use the link printed on the terminal  
 🔹 **Backend (Candid UI):** [View Here](https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.icp0.io/?id=vl2t7-5aaaa-aaaag-at3bq-cai)  
 🔹 **W3T Token (Candid UI):** [View Here](https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.icp0.io/?id=vm3vl-qyaaa-aaaag-at3ba-cai)  
 
